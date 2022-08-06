@@ -12,6 +12,8 @@ import CoreLocation
 protocol weatherPresenterProtocol: NSObject{
     init(view:weatherViewControllerProtocol, networkService: NetworkServiceProtokol, locationManager: LocationManagerProtocol)
     func updateWeatherButtonPressed()
+    func showFitstView()
+    func showSecondView()
     func getWeather(location: Location)
     var weather: WeatherModel? {get set}
 }
@@ -54,7 +56,13 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
         })
     }
     
-
+    func showFitstView() {
+        
+    }
+    
+    func showSecondView() {
+        
+    }
 }
 
 

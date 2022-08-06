@@ -30,7 +30,9 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     let locationButoon = UIButton()
     var currentView = UIView()
     var forecastView = UIView()
-    var tableView = UITableView()
+    var tableView = UITableView(frame: .zero, style: .grouped)
+    
+    let cellSpacingHeight: CGFloat = 40
 
     lazy var pageControll:UISegmentedControl = {
         let items = ["Current", "Forecast"]
@@ -75,6 +77,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         pageControll.addTarget(self, action: #selector(changeScreenWeather), for: .allEvents)
         
         currentView.isHidden = true
+        tableView.showsVerticalScrollIndicator = false
     }
     
     //MARK: STYLE
@@ -254,7 +257,8 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         }
         
         tableView.snp.makeConstraints { make in
-            make.top.left.right.bottom.equalToSuperview()
+            make.top.bottom.equalToSuperview()
+            make.left.right.equalToSuperview().inset(15)
         }
         
     }
@@ -363,20 +367,45 @@ extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataS
 
 extension WeatherViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 15
+        return 5
     }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return cellSpacingHeight
+    }
+
+
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         tableView.register(ForecastTableViewCell.self, forCellReuseIdentifier: ForecastTableViewCell.identifier)
         let cell = tableView.dequeueReusableCell(withIdentifier: ForecastTableViewCell.identifier, for: indexPath)
-        
-        
-        
+
+        cell.backgroundColor = Color.element
+        cell.layer.borderColor = Color.main?.cgColor
+        cell.layer.borderWidth = 4
+        cell.layer.cornerRadius = 15
+        cell.clipsToBounds = true
         return cell
     }
     
+    
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 85
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 5
+    }
+ 
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return "FFFFFFFFFFFFF"
+    }
 
     
+  
+    
+
     
     
 }
