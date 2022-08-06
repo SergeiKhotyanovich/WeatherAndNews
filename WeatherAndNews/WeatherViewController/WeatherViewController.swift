@@ -386,6 +386,8 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource{
         cell.layer.cornerRadius = 15
         cell.clipsToBounds = true
         return cell
+        
+        
     }
     
     
