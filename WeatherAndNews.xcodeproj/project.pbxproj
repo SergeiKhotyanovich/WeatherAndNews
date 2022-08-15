@@ -21,6 +21,7 @@
 		D74A461527F0A71400096B07 /* StartPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74A461427F0A71400096B07 /* StartPresenter.swift */; };
 		D7532C41280AE5300071D2E5 /* WeatherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7532C40280AE5300071D2E5 /* WeatherModel.swift */; };
 		D7532C43280AE5AC0071D2E5 /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7532C42280AE5AC0071D2E5 /* NetworkService.swift */; };
+		D790519428A5802200B8DF7D /* WeatherForecastModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D790519328A5802200B8DF7D /* WeatherForecastModel.swift */; };
 		D7ABA997280C894100CEA5EE /* DataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ABA996280C894100CEA5EE /* DataSource.swift */; };
 		D7CE016127FCAF39001588D7 /* CurrentCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE016027FCAF39001588D7 /* CurrentCollectionViewCell.swift */; };
 		D7CE016327FF4309001588D7 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE016227FF4309001588D7 /* JSON.swift */; };
@@ -56,6 +57,7 @@
 		D74A461427F0A71400096B07 /* StartPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPresenter.swift; sourceTree = "<group>"; };
 		D7532C40280AE5300071D2E5 /* WeatherModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherModel.swift; sourceTree = "<group>"; };
 		D7532C42280AE5AC0071D2E5 /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
+		D790519328A5802200B8DF7D /* WeatherForecastModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherForecastModel.swift; sourceTree = "<group>"; };
 		D7ABA996280C894100CEA5EE /* DataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataSource.swift; sourceTree = "<group>"; };
 		D7CE016027FCAF39001588D7 /* CurrentCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentCollectionViewCell.swift; sourceTree = "<group>"; };
 		D7CE016227FF4309001588D7 /* JSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSON.swift; sourceTree = "<group>"; };
@@ -99,6 +101,7 @@
 			children = (
 				0ECAC8D82899D392009D9145 /* LocationModel.swift */,
 				D7532C40280AE5300071D2E5 /* WeatherModel.swift */,
+				D790519328A5802200B8DF7D /* WeatherForecastModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -151,6 +154,7 @@
 		D74A45FE27F0973E00096B07 /* WeatherAndNews */ = {
 			isa = PBXGroup;
 			children = (
+				D7D7908A289FD52E00377AE6 /* CastomSells */,
 				0ECAC8D72899D385009D9145 /* Model */,
 				D733951928510655006CD09E /* Helpers */,
 				D7D6A9EC27F391C8007AA5C5 /* Service */,
@@ -210,8 +214,6 @@
 		D7D6A9F027F61DD5007AA5C5 /* WeatherViewController */ = {
 			isa = PBXGroup;
 			children = (
-				D7239D9C289C39A100D21E02 /* ForecastTableViewCell.swift */,
-				D7CE016027FCAF39001588D7 /* CurrentCollectionViewCell.swift */,
 				D7D6A9F227F61FA5007AA5C5 /* WeatherViewController.swift */,
 				D7D6A9F427F61FB8007AA5C5 /* WeatherPresenter.swift */,
 				D7D6A9F627F61FC8007AA5C5 /* WeatherBuilder.swift */,
@@ -227,6 +229,15 @@
 				D7D6A9FC27F61FFE007AA5C5 /* NewsBuilder.swift */,
 			);
 			path = NewsViewConroller;
+			sourceTree = "<group>";
+		};
+		D7D7908A289FD52E00377AE6 /* CastomSells */ = {
+			isa = PBXGroup;
+			children = (
+				D7239D9C289C39A100D21E02 /* ForecastTableViewCell.swift */,
+				D7CE016027FCAF39001588D7 /* CurrentCollectionViewCell.swift */,
+			);
+			path = CastomSells;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -366,6 +377,7 @@
 				D74A461527F0A71400096B07 /* StartPresenter.swift in Sources */,
 				D7D6A9EB27F38AE3007AA5C5 /* TabBarBuilder.swift in Sources */,
 				D7339518285105F3006CD09E /* LocationsService.swift in Sources */,
+				D790519428A5802200B8DF7D /* WeatherForecastModel.swift in Sources */,
 				D74A460027F0973E00096B07 /* AppDelegate.swift in Sources */,
 				D7D6A9FF27F62012007AA5C5 /* MapViewController.swift in Sources */,
 				D7532C41280AE5300071D2E5 /* WeatherModel.swift in Sources */,

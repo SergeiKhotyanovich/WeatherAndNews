@@ -10,6 +10,7 @@ import CoreLocation
 
 protocol NetworkServiceProtokol: NSObject{
     func getWeather(location: Location, completion: @escaping (Result<WeatherModel?, Error>) -> Void )
+    func getWeatherForecast(location: Location, completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void)
 }
 
 class NetworkService:NSObject, NetworkServiceProtokol{
@@ -24,13 +25,30 @@ class NetworkService:NSObject, NetworkServiceProtokol{
                 completion(.failure(error))
                 return
             }
-            
             do {
                 let obj = try JSONDecoder().decode(WeatherModel.self, from: data!)
-                print(obj)
                 completion(.success(obj))
             } catch{
                 completion(.failure(error))
+            }
+        }.resume()
+    }
+    
+    func getWeatherForecast(location: Location,  completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void){
+        let urlString = "https://api.openweathermap.org/data/2.5/forecast?lat=\(location.lotitude)&lon=\(location.longitude)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=metric"
+        
+        guard let url = URL(string: urlString) else {return}
+        let urlRequest = URLRequest(url: url)
+        
+        URLSession.shared.dataTask(with: urlRequest) { data, response, error in
+            guard let data = data else { return }
+            
+            do {
+                let obj = try JSONDecoder().decode(WeatherForecastModel.self, from: data)
+                print(obj)
+                completion(.success(obj))
+            } catch{
+                
             }
         }.resume()
     }
