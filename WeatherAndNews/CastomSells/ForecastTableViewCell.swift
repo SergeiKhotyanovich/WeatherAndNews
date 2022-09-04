@@ -67,9 +67,16 @@ class ForecastTableViewCell: UITableViewCell {
 
         
         imageViewForecast.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(4)
-            make.left.equalTo(contentView.snp.left)
-            make.width.height.equalTo(contentView.frame.width/10)
+            make.top.bottom.equalToSuperview().inset(7)
+            make.left.equalToSuperview().inset(7)
+            make.width.equalTo(contentView.frame.width/4)
+           
+        }
+        
+        labelTime.snp.makeConstraints { make in
+            make.centerY.equalToSuperview()
+            make.right.equalToSuperview().inset(15)
+            
         }
     }
     

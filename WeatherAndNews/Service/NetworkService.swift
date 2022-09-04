@@ -45,7 +45,7 @@ class NetworkService:NSObject, NetworkServiceProtokol{
             
             do {
                 let obj = try JSONDecoder().decode(WeatherForecastModel.self, from: data)
-                print(obj)
+//                print(obj.list.first?.dtTxt)
                 completion(.success(obj))
             } catch{
                 

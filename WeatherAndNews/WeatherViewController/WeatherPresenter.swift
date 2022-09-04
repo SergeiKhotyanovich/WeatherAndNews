@@ -18,6 +18,7 @@ protocol weatherPresenterProtocol: NSObject{
     func getWeatherForecast(location: Location)
     var weather: WeatherModel? {get set}
     var weatherForecast: WeatherForecastModel? {get set}
+    var forecastWeatherView: ForecastWeatherViewModel? { get set }
 }
 
 final class WeatherPresenter: NSObject, weatherPresenterProtocol{
@@ -25,6 +26,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
     
     var weather: WeatherModel?
     var weatherForecast: WeatherForecastModel?
+    var forecastWeatherView: ForecastWeatherViewModel?
     
     private weak var view: weatherViewControllerProtocol?
     private var networkService: NetworkServiceProtokol
@@ -35,6 +37,8 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
         self.locationManager = locationManager
         super.init()
         self.view = view
+        
+
     }
     
     func updateWeatherButtonPressed() {
@@ -68,12 +72,44 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
                 switch result {
                 case .success(let weather):
                     self.weatherForecast = weather
-                    
+                    self.forecastWeatherView = self.prepareForecastWeatherViewModel(data: self.weatherForecast!)
+                    print(self.forecastWeatherView?.collectionViewForHourModels.first?.hour)
+                    self.view?.updateTableView()
                 case .failure(let error):
                     self.view?.failure(error: error)
                 }
             }
         })
+    }
+    
+    private func prepareForecastWeatherViewModel(data: WeatherForecastModel) -> ForecastWeatherViewModel {
+        let dateFormatter = DateFormatter()
+
+        var hourModel = [ForecastForHourCollectionViewModel]()
+        var daysModels = [ForecastForDayModel]()
+
+        for hour in data.list{
+            dateFormatter.dateFormat = "HH"
+            let model = ForecastForHourCollectionViewModel(
+                hour: dateFormatter.string(from: Date(timeIntervalSince1970: Double(hour.dt))),
+                temperature: "\(hour.main.temp)",
+                description: "",
+                image: UIImage(systemName:"sun.max")!
+            )
+            
+            hourModel.append(model)
+        }
+        
+        for (_, day) in data.list.enumerated(){
+            dateFormatter.dateFormat = "EEEE"
+            let model = ForecastForDayModel(
+                day: dateFormatter.string(from: Date(timeIntervalSince1970: Double(day.dt)))
+            )
+//            print(model)
+            daysModels.append(model)
+        }
+
+        return ForecastWeatherViewModel(days: daysModels, collectionViewForHourModels: hourModel)
     }
       
     

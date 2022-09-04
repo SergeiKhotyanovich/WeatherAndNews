@@ -9,10 +9,11 @@ import UIKit
 import SnapKit
 import CoreLocation
 
-protocol weatherViewControllerProtocol: AnyObject{
+protocol weatherViewControllerProtocol: AnyObject {
     func setAnotherView()
     func success()
     func failure(error: Error)
+    func updateTableView()
     
 //    func apdateView()
 }
@@ -50,6 +51,8 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         return view
     }()
     
+    var flag = 0
+    
     
 
     override func viewDidLoad() {
@@ -82,7 +85,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     
     //MARK: STYLE
     
-    func setupStyle(){
+    func setupStyle() {
         titleNameLabelStyle()
         searchButoonStyle()
         locationButoonStyle()
@@ -93,7 +96,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         tableViewStyle()
     }
     
-    func titleNameLabelStyle(){
+    func titleNameLabelStyle() {
         titleNameLabel.text = "Weather"
         titleNameLabel.textAlignment = .center
         titleNameLabel.textColor = Color.secondary
@@ -102,7 +105,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         titleNameLabel.minimumScaleFactor = 0.2
     }
     
-    func searchButoonStyle(){
+    func searchButoonStyle() {
         searchButoon.contentVerticalAlignment = .fill
         searchButoon.contentHorizontalAlignment = .fill
         searchButoon.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
@@ -112,7 +115,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         }
     }
     
-    func locationButoonStyle(){
+    func locationButoonStyle() {
         locationButoon.contentVerticalAlignment = .fill
         locationButoon.contentHorizontalAlignment = .fill
         locationButoon.snp.makeConstraints { make in
@@ -122,7 +125,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         locationButoon.setImage(UIImage(systemName: "location"), for: .normal)
     }
     
-    func tempLabelStyle(){
+    func tempLabelStyle() {
        
         tempLabel.textAlignment = .center
         tempLabel.textColor = Color.secondary
@@ -132,7 +135,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         tempLabel.numberOfLines = 0
     }
     
-    func sityLabelStyle(){
+    func sityLabelStyle() {
         sityLabel.text = "Minsk"
         sityLabel.textAlignment = .center
         sityLabel.textColor = Color.secondary
@@ -141,7 +144,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         sityLabel.minimumScaleFactor = 0.2
     }
     
-    func weatherLabelStyle(){
+    func weatherLabelStyle() {
         weatherLabel.text = "Sunny"
         weatherLabel.textAlignment = .center
         weatherLabel.textColor = Color.secondary
@@ -151,12 +154,12 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         weatherLabel.numberOfLines = 0
     }
     
-    func weatherPictureStyle(){
+    func weatherPictureStyle() {
         weatherPicture.image = UIImage(systemName:"sun.max")
         weatherPicture.tintColor = Color.secondary
     }
     
-    func tableViewStyle(){
+    func tableViewStyle() {
         tableView.backgroundColor = UIColor(named: "main")
     }
     
@@ -189,7 +192,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     
     //MARK: LAYOUT
     
-    func setupLayout(){
+    func setupLayout() {
         
         titleNameLabel.snp.makeConstraints { make in
             make.left.equalToSuperview().inset(view.frame.width / 2 - 60)
@@ -285,6 +288,10 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         print(error)
     }
     
+    func updateTableView(){
+        tableView.reloadData()
+    }
+    
     @objc func changeScreenWeather(){
         switch pageControll.selectedSegmentIndex{
         case 0:
@@ -297,9 +304,82 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
             return
         }
     }
+    
+//    func firstWeekday(day: Int) -> String {
+//
+//        let dateFormatter = DateFormatter()
+//        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+//        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+//
+//        if let nonOptdate = presenter.weatherForecast?.list[day].dtTxt{
+//            let date = dateFormatter.date(from:nonOptdate)!
+//            let calendar = Calendar.current
+//            let components = calendar.component(.weekday, from: date)
+//            switch components {
+//                case 1:
+//                    flag = 1
+//                    return "Sunday"
+//                case 2:
+//                    flag = 2
+//                    return "Monday"
+//                case 3:
+//                    flag = 3
+//                    return "Tueday"
+//                case 4:
+//                    flag = 4
+//                    return "Wednesday"
+//                case 5:
+//                    flag = 5
+//                    return "Thuday"
+//                case 6:
+//                    flag = 6
+//                    return "Friday"
+//                case 7:
+//                    flag = 7
+//                    return "Saturday"
+//                default:
+//                    print("Error fetching days")
+//                    return "Day"
+//        }
+//            }
+//        return ""
+//            }
+//    func nextDay() -> String{
+//
+//        if flag == 1{
+//            flag = flag + 1
+//            return "Monday"
+//        }else if flag == 2{
+//            flag = flag + 1
+//            return "Tueday"
+//        }
+//        else if flag == 3{
+//            flag = flag + 1
+//            return "Wednesday"
+//        }
+//        else if flag == 4{
+//            flag = flag + 1
+//            return "Thuday"
+//        }
+//        else if flag == 5{
+//            flag = flag + 1
+//            return "Friday"
+//        }
+//        else if flag == 6{
+//            flag = flag + 1
+//            return "Saturday"
+//        }
+//        else if flag == 7{
+//            flag = 1
+//            return "Sunday"
+//        }
+//        return ""
+//    }
 }
 
-extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
+//MARK: extension currentView
+
+extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 9
@@ -337,6 +417,7 @@ extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataS
         case 7:
             if let feelsLike = presenter.weather?.main.feelsLike{
                 cell.label.text = "\(feelsLike)°C"
+               
             }
             cell.imageView.image = UIImage(systemName: "figure.stand")
         case 2:
@@ -365,17 +446,17 @@ extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataS
     
 }
 
-extension WeatherViewController: UITableViewDelegate, UITableViewDataSource{
+//MARK: extension ForecustView
+
+extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
+        return presenter.forecastWeatherView?.collectionViewForHourModels.count ?? 1
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return cellSpacingHeight
     }
 
-
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         tableView.register(ForecastTableViewCell.self, forCellReuseIdentifier: ForecastTableViewCell.identifier)
         let cell = tableView.dequeueReusableCell(withIdentifier: ForecastTableViewCell.identifier, for: indexPath)
@@ -386,11 +467,7 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource{
         cell.layer.cornerRadius = 15
         cell.clipsToBounds = true
         return cell
-        
-        
     }
-    
-    
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 85
@@ -401,13 +478,8 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource{
     }
  
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return "FFFFFFFFFFFFF"
-    }
 
-    
-  
-    
-
-    
+        return "sdfsdf"
+        }
     
 }
