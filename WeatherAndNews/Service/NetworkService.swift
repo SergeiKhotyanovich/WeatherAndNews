@@ -1,19 +1,13 @@
-//
-//  LocationsServise.swift
-//  WeatherAndNews
-//
-//  Created by Сергей Хотянович on 16.04.22.
-//
 
 import Foundation
 import CoreLocation
 
-protocol NetworkServiceProtokol: NSObject{
+protocol NetworkServiceProtokol: NSObject {
     func getWeather(location: Location, completion: @escaping (Result<WeatherModel?, Error>) -> Void )
     func getWeatherForecast(location: Location, completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void)
 }
 
-class NetworkService:NSObject, NetworkServiceProtokol{
+class NetworkService:NSObject, NetworkServiceProtokol {
     
     func getWeather(location: Location, completion: @escaping (Result<WeatherModel?, Error>) -> Void) {
         let urlString = "https://api.openweathermap.org/data/2.5/weather?lat=\(location.lotitude)&lon=\(location.longitude)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=metric"
@@ -34,7 +28,7 @@ class NetworkService:NSObject, NetworkServiceProtokol{
         }.resume()
     }
     
-    func getWeatherForecast(location: Location,  completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void){
+    func getWeatherForecast(location: Location,  completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void) {
         let urlString = "https://api.openweathermap.org/data/2.5/forecast?lat=\(location.lotitude)&lon=\(location.longitude)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=metric"
         
         guard let url = URL(string: urlString) else {return}

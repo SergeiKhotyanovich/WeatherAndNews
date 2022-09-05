@@ -1,14 +1,8 @@
-//
-//  LocationsModel.swift
-//  WeatherAndNews
-//
-//  Created by Сергей Хотянович on 8.06.22.
-//
 
 import UIKit
 import CoreLocation
 
-protocol LocationManagerProtocol: NSObject{
+protocol LocationManagerProtocol: NSObject {
     var location: ((Location)->Void)? { get set }
 
     func updateLocation()

@@ -1,13 +1,7 @@
-//
-//  WeatherBuilder.swift
-//  WeatherAndNews
-//
-//  Created by Сергей Хотянович on 31.03.22.
-//
 
 import Foundation
 
-final class WeatherBuilder{
+final class WeatherBuilder {
     static func build() -> WeatherViewController{
         let view = WeatherViewController()
         let networkService = NetworkService()
