@@ -67,7 +67,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
                 case .success(let weather):
                     self.weatherForecast = weather
                     self.forecastWeatherView = self.prepareForecastWeatherViewModel(data: self.weatherForecast!)
-                    print(self.forecastWeatherView?.collectionViewForHourModels.first?.hour)
+                    print(self.forecastWeatherView?.collectionViewForHourModels.first?.hour ?? 0)
                     self.view?.updateTableView()
                 case .failure(let error):
                     self.view?.failure(error: error)
