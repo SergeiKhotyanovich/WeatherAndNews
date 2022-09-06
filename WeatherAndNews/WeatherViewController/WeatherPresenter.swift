@@ -1,9 +1,3 @@
-//
-//  WeatherPresenter.swift
-//  WeatherAndNews
-//
-//  Created by Сергей Хотянович on 31.03.22.
-//
 
 import Foundation
 import UIKit
@@ -73,7 +67,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
                 case .success(let weather):
                     self.weatherForecast = weather
                     self.forecastWeatherView = self.prepareForecastWeatherViewModel(data: self.weatherForecast!)
-                    print(self.forecastWeatherView?.collectionViewForHourModels.first?.hour)
+                    print(self.forecastWeatherView?.collectionViewForHourModels.first?.hour ?? 0)
                     self.view?.updateTableView()
                 case .failure(let error):
                     self.view?.failure(error: error)
@@ -100,7 +94,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
             hourModel.append(model)
         }
         
-        for (_, day) in data.list.enumerated(){
+        for (_, day) in data.list.enumerated() {
             dateFormatter.dateFormat = "EEEE"
             let model = ForecastForDayModel(
                 day: dateFormatter.string(from: Date(timeIntervalSince1970: Double(day.dt)))

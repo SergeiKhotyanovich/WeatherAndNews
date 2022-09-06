@@ -1,9 +1,3 @@
-//
-//  WeatherViewController.swift
-//  WeatherAndNews
-//
-//  Created by Сергей Хотянович on 31.03.22.
-//
 
 import UIKit
 import SnapKit
@@ -50,8 +44,13 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         view.register(CurrentCollectionViewCell.self, forCellWithReuseIdentifier: CurrentCollectionViewCell.identifier)
         return view
     }()
+    var dateFormatter = DateFormatter()
+    let date = NSDate()
+    var numberOfSections:[String] = []
+    var numberOfRows:[String] = []
     
-    var flag = 0
+    
+    
     
     
 
@@ -81,6 +80,9 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         
         currentView.isHidden = true
         tableView.showsVerticalScrollIndicator = false
+        
+
+    
     }
     
     //MARK: STYLE
@@ -289,7 +291,9 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     }
     
     func updateTableView(){
+        getDayOfTheWeek()
         tableView.reloadData()
+
     }
     
     @objc func changeScreenWeather(){
@@ -305,76 +309,30 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         }
     }
     
-//    func firstWeekday(day: Int) -> String {
-//
-//        let dateFormatter = DateFormatter()
-//        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-//        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-//
-//        if let nonOptdate = presenter.weatherForecast?.list[day].dtTxt{
-//            let date = dateFormatter.date(from:nonOptdate)!
-//            let calendar = Calendar.current
-//            let components = calendar.component(.weekday, from: date)
-//            switch components {
-//                case 1:
-//                    flag = 1
-//                    return "Sunday"
-//                case 2:
-//                    flag = 2
-//                    return "Monday"
-//                case 3:
-//                    flag = 3
-//                    return "Tueday"
-//                case 4:
-//                    flag = 4
-//                    return "Wednesday"
-//                case 5:
-//                    flag = 5
-//                    return "Thuday"
-//                case 6:
-//                    flag = 6
-//                    return "Friday"
-//                case 7:
-//                    flag = 7
-//                    return "Saturday"
-//                default:
-//                    print("Error fetching days")
-//                    return "Day"
-//        }
-//            }
-//        return ""
-//            }
-//    func nextDay() -> String{
-//
-//        if flag == 1{
-//            flag = flag + 1
-//            return "Monday"
-//        }else if flag == 2{
-//            flag = flag + 1
-//            return "Tueday"
-//        }
-//        else if flag == 3{
-//            flag = flag + 1
-//            return "Wednesday"
-//        }
-//        else if flag == 4{
-//            flag = flag + 1
-//            return "Thuday"
-//        }
-//        else if flag == 5{
-//            flag = flag + 1
-//            return "Friday"
-//        }
-//        else if flag == 6{
-//            flag = flag + 1
-//            return "Saturday"
-//        }
-//        else if flag == 7{
-//            flag = 1
-//            return "Sunday"
-//        }
-//        return ""
-//    }
+    func getDayOfTheWeek() {
+        
+        dateFormatter.dateFormat = "EEEE"
+        let stringDate: String = dateFormatter.string(from: date as Date)
+        numberOfSections.append(stringDate)
+        numberOfRows.append(stringDate)
+        if (presenter.forecastWeatherView?.days) != nil{
+            for day in presenter.forecastWeatherView!.days{
+                let uniqueDay = day.day
+                if uniqueDay != numberOfSections[numberOfSections.count - 1]{
+                    numberOfSections.append(uniqueDay)
+                }
+            }
+            
+            for day in presenter.forecastWeatherView!.days{
+                let uniqueDay = day.day
+                
+                if uniqueDay == numberOfRows[0]{
+                    numberOfRows.append(uniqueDay)
+                    printContent(numberOfRows)
+                }
+            }
+        }
+    }
 }
 
 //MARK: extension currentView
@@ -449,8 +407,31 @@ extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataS
 //MARK: extension ForecustView
 
 extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        let header = view as! UITableViewHeaderFooterView
+        header.textLabel?.textColor = Color.secondary
+        header.textLabel?.font = UIFont(name: "MarkerFelt-Wide", size: 25)
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return presenter.forecastWeatherView?.collectionViewForHourModels.count ?? 1
+        switch section{
+        case 0:
+            return numberOfRows.count
+        case 1:
+            return 8
+        case 2:
+            return 8
+        case 3:
+            return 8
+        case 4:
+            return 8
+        case 5:
+            return 8 - numberOfRows.count
+        default:
+            return 4
+        }
+
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -474,12 +455,33 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 5
+        return numberOfSections.count
     }
+    
+
+
  
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-
-        return "sdfsdf"
+        
+        if (presenter.forecastWeatherView?.days) != nil{
+            switch section{
+            case 0:
+                return numberOfSections[0]
+            case 1:
+                return numberOfSections[1]
+            case 2:
+                return numberOfSections[2]
+            case 3:
+                return numberOfSections[3]
+            case 4:
+                return numberOfSections[4]
+            case 5:
+                return numberOfSections[5]
+            default:
+                return ""
+            }
         }
+        return ""
+    }
     
 }

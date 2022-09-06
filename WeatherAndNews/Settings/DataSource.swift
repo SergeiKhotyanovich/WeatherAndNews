@@ -1,10 +1,3 @@
-//
-//  DataSource.swift
-//  Weather
-//
-//  Created by Sergey Dunaev on 26/09/2018.
-//  Copyright © 2018 Sergey Dunaev. All rights reserved.
-//
 
 import Foundation
 

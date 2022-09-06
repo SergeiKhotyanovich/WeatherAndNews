@@ -1,9 +1,3 @@
-//
-//  ForecastTableViewCell.swift
-//  WeatherAndNews
-//
-//  Created by Сергей Хотянович on 4.08.22.
-//
 
 import UIKit
 
