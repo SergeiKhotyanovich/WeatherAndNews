@@ -10,9 +10,13 @@ protocol weatherPresenterProtocol: NSObject{
     func showSecondView()
     func getWeather(location: Location)
     func getWeatherForecast(location: Location)
+    func getDayOfTheWeek()
+    
     var weather: WeatherModel? {get set}
     var weatherForecast: WeatherForecastModel? {get set}
     var forecastWeatherView: ForecastWeatherViewModel? { get set }
+    var numberOfSections:[String]{get set}
+    var numberOfRows:[String]{get set}
 }
 
 final class WeatherPresenter: NSObject, weatherPresenterProtocol{
@@ -22,9 +26,16 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
     var weatherForecast: WeatherForecastModel?
     var forecastWeatherView: ForecastWeatherViewModel?
     
+    let dateFormatter = DateFormatter()
+    let date = NSDate()
+    var numberOfSections:[String] = []
+    var numberOfRows:[String] = []
+    
     private weak var view: weatherViewControllerProtocol?
     private var networkService: NetworkServiceProtokol
     private var locationManager: LocationManagerProtocol
+    
+
 
     required init(view: weatherViewControllerProtocol, networkService: NetworkServiceProtokol, locationManager: LocationManagerProtocol) {
         self.networkService = networkService
@@ -68,7 +79,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
                     self.weatherForecast = weather
                     self.forecastWeatherView = self.prepareForecastWeatherViewModel(data: self.weatherForecast!)
                     print(self.forecastWeatherView?.collectionViewForHourModels.first?.hour ?? 0)
-                    self.view?.updateTableView()
+                    self.view?.successForecasView()
                 case .failure(let error):
                     self.view?.failure(error: error)
                 }
@@ -104,6 +115,33 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
         }
 
         return ForecastWeatherViewModel(days: daysModels, collectionViewForHourModels: hourModel)
+    }
+    
+    func getDayOfTheWeek() {
+    
+        dateFormatter.dateFormat = "EEEE"
+        let stringDate: String = dateFormatter.string(from: date as Date)
+        numberOfSections.append(stringDate)
+        numberOfRows.append(stringDate)
+        if (forecastWeatherView?.days) != nil{
+            for day in forecastWeatherView!.days{
+                let uniqueDay = day.day
+                if uniqueDay != numberOfSections[numberOfSections.count - 1]{
+                    numberOfSections.append(uniqueDay)
+                }
+            }
+    
+            for day in forecastWeatherView!.days{
+                let uniqueDay = day.day
+    
+                if uniqueDay == numberOfRows[0]{
+                    numberOfRows.append(uniqueDay)
+                   
+                }
+            }
+            
+            view?.updateTableView(numberOfSections: numberOfSections, numberOfRows: numberOfRows)
+        }
     }
       
     

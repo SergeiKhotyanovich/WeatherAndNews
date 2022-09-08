@@ -7,7 +7,8 @@ protocol weatherViewControllerProtocol: AnyObject {
     func setAnotherView()
     func success()
     func failure(error: Error)
-    func updateTableView()
+    func successForecasView()
+    func updateTableView(numberOfSections:[String], numberOfRows:[String])
     
 //    func apdateView()
 }
@@ -26,6 +27,8 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     var currentView = UIView()
     var forecastView = UIView()
     var tableView = UITableView(frame: .zero, style: .grouped)
+    var sections:[String] = []
+    var roud:[String] = []
     
     let cellSpacingHeight: CGFloat = 40
 
@@ -44,10 +47,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         view.register(CurrentCollectionViewCell.self, forCellWithReuseIdentifier: CurrentCollectionViewCell.identifier)
         return view
     }()
-    var dateFormatter = DateFormatter()
-    let date = NSDate()
-    var numberOfSections:[String] = []
-    var numberOfRows:[String] = []
+
     
     
     
@@ -272,10 +272,12 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     
     @objc func updateWeatherButtonPressed() {
         self.presenter.updateWeatherButtonPressed()
+        
     }
     
     @objc func setAnotherView() {
         self.presenter.showFitstView()
+        
     }
     
     func success() {
@@ -283,6 +285,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         weatherLabel.text = DataSource.weatherIDs[presenter.weather?.weather[0].id ?? 0]
         guard let tempLabelNonOpt = presenter.weather?.main.temp else {return}
         tempLabel.text = "\(Int(tempLabelNonOpt.rounded()))°C"
+        
         collectionView.reloadData()
     }
     
@@ -290,8 +293,15 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         print(error)
     }
     
-    func updateTableView(){
-        getDayOfTheWeek()
+    func successForecasView(){
+        self.presenter.getDayOfTheWeek()
+    }
+    
+    func updateTableView(numberOfSections:[String], numberOfRows:[String]){
+        
+        roud = numberOfRows
+        sections = numberOfSections
+        
         tableView.reloadData()
 
     }
@@ -309,30 +319,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         }
     }
     
-    func getDayOfTheWeek() {
-        
-        dateFormatter.dateFormat = "EEEE"
-        let stringDate: String = dateFormatter.string(from: date as Date)
-        numberOfSections.append(stringDate)
-        numberOfRows.append(stringDate)
-        if (presenter.forecastWeatherView?.days) != nil{
-            for day in presenter.forecastWeatherView!.days{
-                let uniqueDay = day.day
-                if uniqueDay != numberOfSections[numberOfSections.count - 1]{
-                    numberOfSections.append(uniqueDay)
-                }
-            }
-            
-            for day in presenter.forecastWeatherView!.days{
-                let uniqueDay = day.day
-                
-                if uniqueDay == numberOfRows[0]{
-                    numberOfRows.append(uniqueDay)
-                    printContent(numberOfRows)
-                }
-            }
-        }
-    }
+
 }
 
 //MARK: extension currentView
@@ -417,7 +404,7 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section{
         case 0:
-            return numberOfRows.count
+            return roud.count
         case 1:
             return 8
         case 2:
@@ -427,7 +414,7 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
         case 4:
             return 8
         case 5:
-            return 8 - numberOfRows.count
+            return 8 - roud.count
         default:
             return 4
         }
@@ -455,7 +442,7 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return numberOfSections.count
+        return sections.count
     }
     
 
@@ -466,17 +453,17 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
         if (presenter.forecastWeatherView?.days) != nil{
             switch section{
             case 0:
-                return numberOfSections[0]
+                return sections[0]
             case 1:
-                return numberOfSections[1]
+                return sections[1]
             case 2:
-                return numberOfSections[2]
+                return sections[2]
             case 3:
-                return numberOfSections[3]
+                return sections[3]
             case 4:
-                return numberOfSections[4]
+                return sections[4]
             case 5:
-                return numberOfSections[5]
+                return sections[5]
             default:
                 return ""
             }
