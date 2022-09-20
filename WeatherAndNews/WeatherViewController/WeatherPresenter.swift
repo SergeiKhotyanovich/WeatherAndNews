@@ -94,7 +94,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
         var daysModels = [ForecastForDayModel]()
 
         for hour in data.list{
-            dateFormatter.dateFormat = "HH"
+            dateFormatter.dateFormat = "HH:mm"
             let model = ForecastForHourCollectionViewModel(
                 hour: dateFormatter.string(from: Date(timeIntervalSince1970: Double(hour.dt))),
                 temperature: "\(hour.main.temp)",
@@ -104,16 +104,13 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
             
             hourModel.append(model)
         }
-        
         for (_, day) in data.list.enumerated() {
             dateFormatter.dateFormat = "EEEE"
             let model = ForecastForDayModel(
                 day: dateFormatter.string(from: Date(timeIntervalSince1970: Double(day.dt)))
             )
-//            print(model)
             daysModels.append(model)
         }
-
         return ForecastWeatherViewModel(days: daysModels, collectionViewForHourModels: hourModel)
     }
     

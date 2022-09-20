@@ -301,7 +301,6 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         
         roud = numberOfRows
         sections = numberOfSections
-        
         tableView.reloadData()
 
     }
@@ -427,13 +426,26 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         tableView.register(ForecastTableViewCell.self, forCellReuseIdentifier: ForecastTableViewCell.identifier)
-        let cell = tableView.dequeueReusableCell(withIdentifier: ForecastTableViewCell.identifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: ForecastTableViewCell.identifier, for: indexPath) as! ForecastTableViewCell
+
 
         cell.backgroundColor = Color.element
         cell.layer.borderColor = Color.main?.cgColor
         cell.layer.borderWidth = 4
         cell.layer.cornerRadius = 15
         cell.clipsToBounds = true
+//        let day = presenter.forecastWeatherView
+//        
+//        let link = day?.collectionViewForHourModels[indexPath.row]
+//        
+//        cell.updateCell(
+//            temperature: link?.temperature ?? "",
+//            image: link!.image,
+//            description: link!.description,
+//            time: link!.hour)
+//        
+        
+        
         return cell
     }
     
