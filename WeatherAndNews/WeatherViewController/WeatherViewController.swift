@@ -16,6 +16,7 @@ protocol weatherViewControllerProtocol: AnyObject {
 class WeatherViewController: UIViewController,weatherViewControllerProtocol {
  
     public var presenter: weatherPresenterProtocol!
+    private var forecastViewModel: ForecastWeatherViewModel?
     
     let weatherPicture = UIImageView()
     let tempLabel = UILabel()
@@ -29,6 +30,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     var tableView = UITableView(frame: .zero, style: .grouped)
     var sections:[String] = []
     var roud:[String] = []
+    lazy var roudCount = roud.count - 1
     
     let cellSpacingHeight: CGFloat = 40
 
@@ -47,12 +49,6 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         view.register(CurrentCollectionViewCell.self, forCellWithReuseIdentifier: CurrentCollectionViewCell.identifier)
         return view
     }()
-
-    
-    
-    
-    
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -157,7 +153,6 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     }
     
     func weatherPictureStyle() {
-        weatherPicture.image = UIImage(systemName:"sun.max")
         weatherPicture.tintColor = Color.secondary
     }
     
@@ -281,6 +276,8 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     }
     
     func success() {
+        weatherPicture.image = WeatherImages.getWeatherPic(
+            name: (presenter.weather?.weather[0].icon)!) 
         sityLabel.text = presenter.weather?.name
         weatherLabel.text = DataSource.weatherIDs[presenter.weather?.weather[0].id ?? 0]
         guard let tempLabelNonOpt = presenter.weather?.main.temp else {return}
@@ -317,6 +314,12 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
             return
         }
     }
+    
+//    func updateView(model: ForecastWeatherViewModel) {
+//        forecastViewModel = model
+//        hourCellsCount = 1
+//        tableView.reloadData()
+//    }
     
 
 }
@@ -365,11 +368,8 @@ extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataS
             }
             cell.imageView.image = UIImage(systemName: "figure.stand")
         case 2:
-            if let rain = presenter.weather?.rain?.the3H{
-                cell.label.text = "\(rain)mm"
-            }else{
-                cell.label.text = "0mm"
-            }
+                cell.label.text = "10mm"
+           
             cell.imageView.image = UIImage(systemName: "cloud.heavyrain")
         case 5:
             if let tempMax = presenter.weather?.main.tempMax{
@@ -415,7 +415,7 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
         case 5:
             return 8 - roud.count
         default:
-            return 4
+            return 8
         }
 
     }
@@ -434,18 +434,66 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
         cell.layer.borderWidth = 4
         cell.layer.cornerRadius = 15
         cell.clipsToBounds = true
-//        let day = presenter.forecastWeatherView
-//        
-//        let link = day?.collectionViewForHourModels[indexPath.row]
-//        
+    
+        if indexPath.section == 0{
+            let link = presenter.forecastWeatherView?.collectionViewForHourModels[indexPath.row]
+            
+            cell.updateCell(
+                temperature: link?.temperature ?? "",
+                image: link!.image,
+                description: link!.description,
+                time: link!.hour)
+        }else if indexPath.section == 1{
+            let link = presenter.forecastWeatherView?.collectionViewForHourModels[indexPath.row + roud.count]
+            
+            cell.updateCell(
+                temperature: link?.temperature ?? "",
+                image: link!.image,
+                description: link!.description,
+                time: link!.hour)
+        }else if indexPath.section == 2{
+            let link = presenter.forecastWeatherView?.collectionViewForHourModels[indexPath.row + 8 + roud.count]
+            
+            cell.updateCell(
+                temperature: link?.temperature ?? "",
+                image: link!.image,
+                description: link!.description,
+                time: link!.hour)
+        }else if indexPath.section == 3{
+            let link = presenter.forecastWeatherView?.collectionViewForHourModels[indexPath.row + 16 + roud.count]
+            
+            cell.updateCell(
+                temperature: link?.temperature ?? "",
+                image: link!.image,
+                description: link!.description,
+                time: link!.hour)
+        }else if indexPath.section == 4{
+            let link = presenter.forecastWeatherView?.collectionViewForHourModels[indexPath.row + 24 + roud.count]
+            
+            cell.updateCell(
+                temperature: link?.temperature ?? "",
+                image: link!.image,
+                description: link!.description,
+                time: link!.hour)
+        }else if indexPath.section == 5{
+            let link = presenter.forecastWeatherView?.collectionViewForHourModels[indexPath.row + 32 + roud.count]
+            
+            cell.updateCell(
+                temperature: link?.temperature ?? "",
+                image: link!.image,
+                description: link!.description,
+                time: link!.hour)
+        }
+        
+        
+//        let link = presenter.forecastWeatherView?.collectionViewForHourModels[]
+//
 //        cell.updateCell(
 //            temperature: link?.temperature ?? "",
 //            image: link!.image,
 //            description: link!.description,
 //            time: link!.hour)
-//        
-        
-        
+//
         return cell
     }
     

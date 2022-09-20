@@ -60,9 +60,11 @@ struct MainClass: Codable {
 
 struct WeatherForecast: Codable {
     let id: Int
-
+    let icon: String
+    
     enum CodingKeys: String, CodingKey {
         case id
+        case icon
     }
 }
 

@@ -78,7 +78,6 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
                 case .success(let weather):
                     self.weatherForecast = weather
                     self.forecastWeatherView = self.prepareForecastWeatherViewModel(data: self.weatherForecast!)
-                    print(self.forecastWeatherView?.collectionViewForHourModels.first?.hour ?? 0)
                     self.view?.successForecasView()
                 case .failure(let error):
                     self.view?.failure(error: error)
@@ -93,16 +92,21 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
         var hourModel = [ForecastForHourCollectionViewModel]()
         var daysModels = [ForecastForDayModel]()
 
-        for hour in data.list{
+        for (_, hour) in data.list.enumerated(){
             dateFormatter.dateFormat = "HH:mm"
             let model = ForecastForHourCollectionViewModel(
                 hour: dateFormatter.string(from: Date(timeIntervalSince1970: Double(hour.dt))),
-                temperature: "\(hour.main.temp)",
-                description: "",
-                image: UIImage(systemName:"sun.max")!
+                temperature: "\(Int(hour.main.temp))",
+                description:
+                    DataSource.weatherIDs[hour.weather[0].id ] ?? "",
+                  
+                image: WeatherImages.getWeatherPic(
+                    name: hour.weather[0].icon
+                ) ?? UIImage.systemNamed("sun.max")
             )
             
             hourModel.append(model)
+//            print("\(hourModel), \(number)")
         }
         for (_, day) in data.list.enumerated() {
             dateFormatter.dateFormat = "EEEE"
