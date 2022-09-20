@@ -46,6 +46,7 @@ class ForecastTableViewCell: UITableViewCell {
     
     var labelDescriptions: UILabel = {
        let label = UILabel()
+       label.numberOfLines = 2
        label.text = "Облачно"
        label.textAlignment = .center
        label.textColor = Color.secondary
@@ -54,6 +55,8 @@ class ForecastTableViewCell: UITableViewCell {
        label.minimumScaleFactor = 0.2
        return label
    }()
+    
+    private var collectionViewModels: [ForecastForHourCollectionViewModel]?
     
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -85,22 +88,34 @@ class ForecastTableViewCell: UITableViewCell {
         }
         
         labelTime.snp.makeConstraints { make in
-            make.left.equalTo(imageViewForecast.snp.right).offset(15)
+            make.left.equalTo(imageViewForecast.snp.right).offset(30)
             make.top.equalToSuperview()
         }
         
         labelDescriptions.snp.makeConstraints { make in
-            make.left.equalTo(imageViewForecast.snp.right).offset(15)
+            make.left.equalTo(imageViewForecast.snp.right)
             make.bottom.equalToSuperview().inset(5)
+            make.top.equalTo(labelTemp).inset(30)
+            make.right.equalTo(labelTemp.snp.left).inset(-5)
+            
         }
     }
     
     func updateCell(temperature: String, image: UIImage, description: String, time: String) {
-        labelTemp.text = temperature
+        labelTemp.text = temperature + "°C"
         imageViewForecast.image = image
         labelDescriptions.text = description
         labelTime.text = time
         
     }
     
+    func updateCell(model: [ForecastForHourCollectionViewModel]) {
+        collectionViewModels = model
+//        collectionView.reloadData()
+    }
+    
+
+    
 }
+
+
