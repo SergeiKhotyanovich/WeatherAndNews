@@ -10,10 +10,12 @@ protocol weatherPresenterProtocol: NSObject{
     func showSecondView()
     func getWeather(location: Location)
     func getWeatherForecast(location: Location)
+    func getSearchSity(sity: String)
     func getDayOfTheWeek()
     
     var weather: WeatherModel? {get set}
     var weatherForecast: WeatherForecastModel? {get set}
+    var sityModel: Welcome?{get set}
     var forecastWeatherView: ForecastWeatherViewModel? { get set }
     var numberOfSections:[String]{get set}
     var numberOfRows:[String]{get set}
@@ -25,6 +27,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
     var weather: WeatherModel?
     var weatherForecast: WeatherForecastModel?
     var forecastWeatherView: ForecastWeatherViewModel?
+    var sityModel: Welcome?
     
     let dateFormatter = DateFormatter()
     let date = NSDate()
@@ -52,7 +55,18 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
             self?.getWeather(location: result)
             self?.getWeatherForecast(location: result)
         }
-
+    }
+    
+    func updateWeatherButtonOKPressed() {
+        guard let sityModel = sityModel else {
+            return
+        }
+        let location = Location(longitude: String(sityModel.first?.lon ?? 0),
+                                lotitude: String(sityModel.first?.lat ?? 0))
+        
+        getWeather(location: location)
+        getWeatherForecast(location: location)
+        
     }
     
     func getWeather(location: Location) {
@@ -79,6 +93,21 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
                     self.weatherForecast = weather
                     self.forecastWeatherView = self.prepareForecastWeatherViewModel(data: self.weatherForecast!)
                     self.view?.successForecasView()
+                case .failure(let error):
+                    self.view?.failure(error: error)
+                }
+            }
+        })
+    }
+    
+    func getSearchSity(sity: String) {
+        networkService.getSearchSity(sity: sity, completion:  { [weak self] result in
+            guard let self = self else {return}
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let sity):
+                    self.sityModel = sity
+                    self.updateWeatherButtonOKPressed()
                 case .failure(let error):
                     self.view?.failure(error: error)
                 }
@@ -142,6 +171,8 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
             }
             
             view?.updateTableView(numberOfSections: numberOfSections, numberOfRows: numberOfRows)
+            numberOfRows = []
+            numberOfSections = []
         }
     }
       
