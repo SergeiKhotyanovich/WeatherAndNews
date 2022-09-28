@@ -24,13 +24,20 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     let weatherLabel = UILabel()
     let titleNameLabel = UILabel()
     let searchButoon = UIButton(type: .system)
-    let locationButoon = UIButton()
+    let locationButton = UIButton()
     var currentView = UIView()
     var forecastView = UIView()
     var tableView = UITableView(frame: .zero, style: .grouped)
     var sections:[String] = []
-    var roud:[String] = []
-    lazy var roudCount = roud.count - 1
+    var buttonIsHidenSearhView = UIButton(type: .system)
+    private var roud:[String] = []
+    private lazy var roudCount = roud.count - 1
+    var sityName = "moscow"
+    
+    var searchView = UIView()
+    var searchOkButton = UIButton(type: .system)
+    var searchTextField = UITextField()
+
     
     let cellSpacingHeight: CGFloat = 40
 
@@ -53,9 +60,12 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.addSubviews([titleNameLabel,searchButoon,locationButoon,pageControll,currentView,forecastView])
+        view.addSubviews([titleNameLabel,searchButoon,locationButton,searchView, pageControll,currentView,forecastView,buttonIsHidenSearhView])
         currentView.addSubviews([tempLabel,weatherPicture,sityLabel,weatherLabel,collectionView])
         forecastView.addSubviews([tableView])
+        searchView.addSubviews([searchTextField,searchOkButton])
+        
+    
         
         setupLayout()
         setupStyle()
@@ -67,17 +77,27 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         tableView.delegate = self
         tableView.dataSource = self
         setupCollectionViewLayout()
+        
+        searchView.backgroundColor = Color.main
 
     
         view.backgroundColor = UIColor(named: "main")
         
-        locationButoon.addTarget(self, action: #selector(updateWeatherButtonPressed), for: .touchUpInside)
+        locationButton.addTarget(self, action: #selector(updateWeatherButtonPressed), for: .touchUpInside)
         pageControll.addTarget(self, action: #selector(changeScreenWeather), for: .allEvents)
+        searchButoon.addTarget(self, action: #selector(animateHidenSearchView), for: .touchUpInside)
+        buttonIsHidenSearhView.addTarget(self, action: #selector(animateIsHidenSearchView), for: .touchUpInside)
+        searchOkButton.addTarget(self, action: #selector(searchButtonOkPress), for: .touchUpInside)
+        
         
         currentView.isHidden = true
+        searchView.alpha = 0
+        buttonIsHidenSearhView.alpha = 0
         tableView.showsVerticalScrollIndicator = false
         
-
+        
+        
+        
     
     }
     
@@ -92,6 +112,8 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         sityLabelStyle()
         weatherLabelStyle()
         tableViewStyle()
+        searchTextFieldStyle()
+        searchOkButtonStyle()
     }
     
     func titleNameLabelStyle() {
@@ -114,13 +136,13 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     }
     
     func locationButoonStyle() {
-        locationButoon.contentVerticalAlignment = .fill
-        locationButoon.contentHorizontalAlignment = .fill
-        locationButoon.snp.makeConstraints { make in
+        locationButton.contentVerticalAlignment = .fill
+        locationButton.contentHorizontalAlignment = .fill
+        locationButton.snp.makeConstraints { make in
             make.width.height.equalTo(25)
         }
-        locationButoon.tintColor = Color.secondary
-        locationButoon.setImage(UIImage(systemName: "location"), for: .normal)
+        locationButton.tintColor = Color.secondary
+        locationButton.setImage(UIImage(systemName: "location"), for: .normal)
     }
     
     func tempLabelStyle() {
@@ -159,6 +181,47 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     func tableViewStyle() {
         tableView.backgroundColor = UIColor(named: "main")
     }
+    
+    func searchTextFieldStyle() {
+        searchTextField.placeholder = " Enter sity"
+        searchTextField.layer.borderWidth = 1.5
+        searchTextField.layer.borderColor = Color.secondary?.cgColor
+        searchTextField.layer.cornerRadius = 15
+        searchTextField.textColor = Color.secondary
+        searchTextField.font = UIFont(name: "ChalkboardSE-Regular", size: 20)
+        let spacerView = UIView(frame:CGRect(x:0, y:0, width:10, height:10))
+        searchTextField.leftViewMode = UITextField.ViewMode.always
+        searchTextField.leftView = spacerView
+    }
+    
+    func searchOkButtonStyle() {
+        searchOkButton.contentVerticalAlignment = .fill
+        searchOkButton.contentHorizontalAlignment = .fill
+        searchOkButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        searchOkButton.tintColor = Color.secondary
+    }
+    
+
+    
+    @objc func animateHidenSearchView() {
+        
+        
+        UIView.animate(withDuration: 0.3) {
+            
+            self.searchView.alpha = 1
+ 
+            self.buttonIsHidenSearhView.tintColor = .black
+            self.buttonIsHidenSearhView.alpha = 0.3
+        }
+    }
+    
+    @objc func animateIsHidenSearchView() {
+        
+        UIView.animate(withDuration: 0.3) {
+            self.searchView.alpha = 0
+            self.buttonIsHidenSearhView.alpha = 0
+            }
+        }
     
     private func setupCollectionViewLayout() {
         collectionView.layoutIfNeeded()
@@ -202,7 +265,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
             make.top.equalToSuperview().inset(50)
         }
         
-        locationButoon.snp.makeConstraints { make in
+        locationButton.snp.makeConstraints { make in
             make.left.equalTo(searchButoon.snp.right).offset(10)
             make.top.equalToSuperview().inset(50)
         }
@@ -261,13 +324,40 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
             make.left.right.equalToSuperview().inset(15)
         }
         
+        searchView.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(45)
+            make.right.left.equalToSuperview().inset(65)
+            make.bottom.equalTo(pageControll).inset(50)
+        }
+        
+        searchTextField.snp.makeConstraints { make in
+            make.top.bottom.equalToSuperview()
+            make.left.equalToSuperview()
+            make.right.equalToSuperview().inset(60)
+        }
+        searchOkButton.snp.makeConstraints { make in
+            make.top.bottom.equalToSuperview()
+            make.left.equalTo(searchTextField.snp.right).offset(10)
+            make.right.equalToSuperview().inset(10)
+        }
+        buttonIsHidenSearhView.snp.makeConstraints { make in
+            make.top.equalTo(pageControll)
+            make.right.left.bottom.equalToSuperview()
+        }
+        
     }
     
     //MARK: FUNC
     
+    @objc func searchButtonOkPress() {
+
+        guard let sityName = searchTextField.text else { return }
+        self.presenter.getSearchSity(sity: sityName)
+    }
+    
+    
     @objc func updateWeatherButtonPressed() {
         self.presenter.updateWeatherButtonPressed()
-        
     }
     
     @objc func setAnotherView() {
@@ -294,11 +384,11 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         self.presenter.getDayOfTheWeek()
     }
     
-    func updateTableView(numberOfSections:[String], numberOfRows:[String]){
-        
+    func updateTableView(numberOfSections:[String], numberOfRows:[String]) {
         roud = numberOfRows
         sections = numberOfSections
         tableView.reloadData()
+        print(roud,sections)
 
     }
     
@@ -534,3 +624,6 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
     
     
 }
+
+
+
