@@ -210,8 +210,8 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
             
             self.searchView.alpha = 1
  
-            self.buttonIsHidenSearhView.tintColor = .black
-            self.buttonIsHidenSearhView.alpha = 0.3
+            self.buttonIsHidenSearhView.backgroundColor = .black
+            self.buttonIsHidenSearhView.alpha = 0.15
         }
     }
     
