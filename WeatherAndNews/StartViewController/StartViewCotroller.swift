@@ -1,14 +1,9 @@
-//
-//  ViewController.swift
-//  WeatherAndNews
-//
-//  Created by Сергей Хотянович on 27.03.22.
-//
+
 
 import UIKit
 import SnapKit
 
-protocol startViewCotrollerProtocol: AnyObject{
+protocol startViewCotrollerProtocol: AnyObject {
     func routeToNextVC()
 }
 
@@ -49,7 +44,7 @@ class StartViewCotroller: UIViewController, startViewCotrollerProtocol {
     
     //MARK: LAYOUT
     
-    func setupLayout(){
+    func setupLayout() {
         buttonWeatherLayout()
         buttonNewsLayuot()
     }
@@ -64,7 +59,7 @@ class StartViewCotroller: UIViewController, startViewCotrollerProtocol {
         ])
     }
     
-    func buttonNewsLayuot(){
+    func buttonNewsLayuot() {
         buttonNews.translatesAutoresizingMaskIntoConstraints = false
         
         view.addConstraints([
@@ -79,12 +74,12 @@ class StartViewCotroller: UIViewController, startViewCotrollerProtocol {
     
     //MARK: STYLE
     
-    func setupStyle(){
+    func setupStyle() {
         buttonWeatherStyle()
         buttonNewsStyle()
     }
     
-    func buttonStyle(text:String, button:UIButton){
+    func buttonStyle(text:String, button:UIButton) {
         button.backgroundColor = Color.secondary
         button.setTitle(text, for: .normal)
         button.layer.cornerRadius = 8

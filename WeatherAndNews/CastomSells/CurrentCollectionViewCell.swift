@@ -1,9 +1,4 @@
-//
-//  CollectionViewCell.swift
-//  WeatherAndNews
-//
-//  Created by Сергей Хотянович on 5.04.22.
-//
+
 
 import UIKit
 import SnapKit

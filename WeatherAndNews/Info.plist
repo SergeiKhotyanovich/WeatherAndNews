@@ -8,6 +8,6 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Где ты находишься, сука?</string>
+	<string></string>
 </dict>
 </plist>

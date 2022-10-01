@@ -1,18 +1,14 @@
-//
-//  WeatherViewController.swift
-//  WeatherAndNews
-//
-//  Created by Сергей Хотянович on 31.03.22.
-//
 
 import UIKit
 import SnapKit
 import CoreLocation
 
-protocol weatherViewControllerProtocol: AnyObject{
+protocol weatherViewControllerProtocol: AnyObject {
     func setAnotherView()
     func success()
     func failure(error: Error)
+    func successForecasView()
+    func updateTableView(numberOfSections:[String], numberOfRows:[String])
     
 //    func apdateView()
 }
@@ -20,6 +16,7 @@ protocol weatherViewControllerProtocol: AnyObject{
 class WeatherViewController: UIViewController,weatherViewControllerProtocol {
  
     public var presenter: weatherPresenterProtocol!
+    private var forecastViewModel: ForecastWeatherViewModel?
     
     let weatherPicture = UIImageView()
     let tempLabel = UILabel()
@@ -27,10 +24,20 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     let weatherLabel = UILabel()
     let titleNameLabel = UILabel()
     let searchButoon = UIButton(type: .system)
-    let locationButoon = UIButton()
+    let locationButton = UIButton()
     var currentView = UIView()
     var forecastView = UIView()
     var tableView = UITableView(frame: .zero, style: .grouped)
+    var sections:[String] = []
+    var buttonIsHidenSearhView = UIButton(type: .system)
+    private var roud:[String] = []
+    private lazy var roudCount = roud.count - 1
+    var sityName = "moscow"
+    
+    var searchView = UIView()
+    var searchOkButton = UIButton(type: .system)
+    var searchTextField = UITextField()
+
     
     let cellSpacingHeight: CGFloat = 40
 
@@ -49,15 +56,16 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         view.register(CurrentCollectionViewCell.self, forCellWithReuseIdentifier: CurrentCollectionViewCell.identifier)
         return view
     }()
-    
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.addSubviews([titleNameLabel,searchButoon,locationButoon,pageControll,currentView,forecastView])
+        view.addSubviews([titleNameLabel,searchButoon,locationButton,searchView, pageControll,currentView,forecastView,buttonIsHidenSearhView])
         currentView.addSubviews([tempLabel,weatherPicture,sityLabel,weatherLabel,collectionView])
         forecastView.addSubviews([tableView])
+        searchView.addSubviews([searchTextField,searchOkButton])
+        
+    
         
         setupLayout()
         setupStyle()
@@ -69,20 +77,33 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         tableView.delegate = self
         tableView.dataSource = self
         setupCollectionViewLayout()
+        
+        searchView.backgroundColor = Color.main
 
     
         view.backgroundColor = UIColor(named: "main")
         
-        locationButoon.addTarget(self, action: #selector(updateWeatherButtonPressed), for: .touchUpInside)
+        locationButton.addTarget(self, action: #selector(updateWeatherButtonPressed), for: .touchUpInside)
         pageControll.addTarget(self, action: #selector(changeScreenWeather), for: .allEvents)
+        searchButoon.addTarget(self, action: #selector(animateHidenSearchView), for: .touchUpInside)
+        buttonIsHidenSearhView.addTarget(self, action: #selector(animateIsHidenSearchView), for: .touchUpInside)
+        searchOkButton.addTarget(self, action: #selector(searchButtonOkPress), for: .touchUpInside)
+        
         
         currentView.isHidden = true
+        searchView.alpha = 0
+        buttonIsHidenSearhView.alpha = 0
         tableView.showsVerticalScrollIndicator = false
+        
+        
+        
+        
+    
     }
     
     //MARK: STYLE
     
-    func setupStyle(){
+    func setupStyle() {
         titleNameLabelStyle()
         searchButoonStyle()
         locationButoonStyle()
@@ -91,9 +112,11 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         sityLabelStyle()
         weatherLabelStyle()
         tableViewStyle()
+        searchTextFieldStyle()
+        searchOkButtonStyle()
     }
     
-    func titleNameLabelStyle(){
+    func titleNameLabelStyle() {
         titleNameLabel.text = "Weather"
         titleNameLabel.textAlignment = .center
         titleNameLabel.textColor = Color.secondary
@@ -102,7 +125,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         titleNameLabel.minimumScaleFactor = 0.2
     }
     
-    func searchButoonStyle(){
+    func searchButoonStyle() {
         searchButoon.contentVerticalAlignment = .fill
         searchButoon.contentHorizontalAlignment = .fill
         searchButoon.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
@@ -112,17 +135,17 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         }
     }
     
-    func locationButoonStyle(){
-        locationButoon.contentVerticalAlignment = .fill
-        locationButoon.contentHorizontalAlignment = .fill
-        locationButoon.snp.makeConstraints { make in
+    func locationButoonStyle() {
+        locationButton.contentVerticalAlignment = .fill
+        locationButton.contentHorizontalAlignment = .fill
+        locationButton.snp.makeConstraints { make in
             make.width.height.equalTo(25)
         }
-        locationButoon.tintColor = Color.secondary
-        locationButoon.setImage(UIImage(systemName: "location"), for: .normal)
+        locationButton.tintColor = Color.secondary
+        locationButton.setImage(UIImage(systemName: "location"), for: .normal)
     }
     
-    func tempLabelStyle(){
+    func tempLabelStyle() {
        
         tempLabel.textAlignment = .center
         tempLabel.textColor = Color.secondary
@@ -132,7 +155,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         tempLabel.numberOfLines = 0
     }
     
-    func sityLabelStyle(){
+    func sityLabelStyle() {
         sityLabel.text = "Minsk"
         sityLabel.textAlignment = .center
         sityLabel.textColor = Color.secondary
@@ -141,7 +164,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         sityLabel.minimumScaleFactor = 0.2
     }
     
-    func weatherLabelStyle(){
+    func weatherLabelStyle() {
         weatherLabel.text = "Sunny"
         weatherLabel.textAlignment = .center
         weatherLabel.textColor = Color.secondary
@@ -151,14 +174,54 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
         weatherLabel.numberOfLines = 0
     }
     
-    func weatherPictureStyle(){
-        weatherPicture.image = UIImage(systemName:"sun.max")
+    func weatherPictureStyle() {
         weatherPicture.tintColor = Color.secondary
     }
     
-    func tableViewStyle(){
+    func tableViewStyle() {
         tableView.backgroundColor = UIColor(named: "main")
     }
+    
+    func searchTextFieldStyle() {
+        searchTextField.placeholder = " Enter sity"
+        searchTextField.layer.borderWidth = 1.5
+        searchTextField.layer.borderColor = Color.secondary?.cgColor
+        searchTextField.layer.cornerRadius = 15
+        searchTextField.textColor = Color.secondary
+        searchTextField.font = UIFont(name: "ChalkboardSE-Regular", size: 20)
+        let spacerView = UIView(frame:CGRect(x:0, y:0, width:10, height:10))
+        searchTextField.leftViewMode = UITextField.ViewMode.always
+        searchTextField.leftView = spacerView
+    }
+    
+    func searchOkButtonStyle() {
+        searchOkButton.contentVerticalAlignment = .fill
+        searchOkButton.contentHorizontalAlignment = .fill
+        searchOkButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        searchOkButton.tintColor = Color.secondary
+    }
+    
+
+    
+    @objc func animateHidenSearchView() {
+        
+        
+        UIView.animate(withDuration: 0.3) {
+            
+            self.searchView.alpha = 1
+ 
+            self.buttonIsHidenSearhView.backgroundColor = .black
+            self.buttonIsHidenSearhView.alpha = 0.15
+        }
+    }
+    
+    @objc func animateIsHidenSearchView() {
+        
+        UIView.animate(withDuration: 0.3) {
+            self.searchView.alpha = 0
+            self.buttonIsHidenSearhView.alpha = 0
+            }
+        }
     
     private func setupCollectionViewLayout() {
         collectionView.layoutIfNeeded()
@@ -189,7 +252,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     
     //MARK: LAYOUT
     
-    func setupLayout(){
+    func setupLayout() {
         
         titleNameLabel.snp.makeConstraints { make in
             make.left.equalToSuperview().inset(view.frame.width / 2 - 60)
@@ -202,7 +265,7 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
             make.top.equalToSuperview().inset(50)
         }
         
-        locationButoon.snp.makeConstraints { make in
+        locationButton.snp.makeConstraints { make in
             make.left.equalTo(searchButoon.snp.right).offset(10)
             make.top.equalToSuperview().inset(50)
         }
@@ -261,9 +324,37 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
             make.left.right.equalToSuperview().inset(15)
         }
         
+        searchView.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(45)
+            make.right.left.equalToSuperview().inset(65)
+            make.bottom.equalTo(pageControll).inset(50)
+        }
+        
+        searchTextField.snp.makeConstraints { make in
+            make.top.bottom.equalToSuperview()
+            make.left.equalToSuperview()
+            make.right.equalToSuperview().inset(60)
+        }
+        searchOkButton.snp.makeConstraints { make in
+            make.top.bottom.equalToSuperview()
+            make.left.equalTo(searchTextField.snp.right).offset(10)
+            make.right.equalToSuperview().inset(10)
+        }
+        buttonIsHidenSearhView.snp.makeConstraints { make in
+            make.top.equalTo(pageControll)
+            make.right.left.bottom.equalToSuperview()
+        }
+        
     }
     
     //MARK: FUNC
+    
+    @objc func searchButtonOkPress() {
+
+        guard let sityName = searchTextField.text else { return }
+        self.presenter.getSearchSity(sity: sityName)
+    }
+    
     
     @objc func updateWeatherButtonPressed() {
         self.presenter.updateWeatherButtonPressed()
@@ -271,18 +362,34 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
     
     @objc func setAnotherView() {
         self.presenter.showFitstView()
+        
     }
     
     func success() {
+        weatherPicture.image = WeatherImages.getWeatherPic(
+            name: (presenter.weather?.weather[0].icon)!) 
         sityLabel.text = presenter.weather?.name
         weatherLabel.text = DataSource.weatherIDs[presenter.weather?.weather[0].id ?? 0]
         guard let tempLabelNonOpt = presenter.weather?.main.temp else {return}
         tempLabel.text = "\(Int(tempLabelNonOpt.rounded()))°C"
+        
         collectionView.reloadData()
     }
     
     func failure(error: Error) {
         print(error)
+    }
+    
+    func successForecasView(){
+        self.presenter.getDayOfTheWeek()
+    }
+    
+    func updateTableView(numberOfSections:[String], numberOfRows:[String]) {
+        roud = numberOfRows
+        sections = numberOfSections
+        tableView.reloadData()
+        print(roud,sections)
+
     }
     
     @objc func changeScreenWeather(){
@@ -297,9 +404,19 @@ class WeatherViewController: UIViewController,weatherViewControllerProtocol {
             return
         }
     }
+    
+//    func updateView(model: ForecastWeatherViewModel) {
+//        forecastViewModel = model
+//        hourCellsCount = 1
+//        tableView.reloadData()
+//    }
+    
+
 }
 
-extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
+//MARK: extension currentView
+
+extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 9
@@ -337,14 +454,12 @@ extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataS
         case 7:
             if let feelsLike = presenter.weather?.main.feelsLike{
                 cell.label.text = "\(feelsLike)°C"
+               
             }
             cell.imageView.image = UIImage(systemName: "figure.stand")
         case 2:
-            if let rain = presenter.weather?.rain?.the3H{
-                cell.label.text = "\(rain)mm"
-            }else{
-                cell.label.text = "0mm"
-            }
+                cell.label.text = "10mm"
+           
             cell.imageView.image = UIImage(systemName: "cloud.heavyrain")
         case 5:
             if let tempMax = presenter.weather?.main.tempMax{
@@ -365,49 +480,150 @@ extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataS
     
 }
 
-extension WeatherViewController: UITableViewDelegate, UITableViewDataSource{
+//MARK: extension ForecustView
+
+extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        let header = view as! UITableViewHeaderFooterView
+        header.textLabel?.textColor = Color.secondary
+        header.textLabel?.font = UIFont(name: "MarkerFelt-Wide", size: 25)
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
+        switch section{
+        case 0:
+            return roud.count
+        case 1:
+            return 8
+        case 2:
+            return 8
+        case 3:
+            return 8
+        case 4:
+            return 8
+        case 5:
+            return 8 - roud.count
+        default:
+            return 8
+        }
+
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return cellSpacingHeight
     }
 
-
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         tableView.register(ForecastTableViewCell.self, forCellReuseIdentifier: ForecastTableViewCell.identifier)
-        let cell = tableView.dequeueReusableCell(withIdentifier: ForecastTableViewCell.identifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: ForecastTableViewCell.identifier, for: indexPath) as! ForecastTableViewCell
+
 
         cell.backgroundColor = Color.element
         cell.layer.borderColor = Color.main?.cgColor
         cell.layer.borderWidth = 4
         cell.layer.cornerRadius = 15
         cell.clipsToBounds = true
+    
+        if indexPath.section == 0{
+            let link = presenter.forecastWeatherView?.collectionViewForHourModels[indexPath.row]
+            
+            cell.updateCell(
+                temperature: link?.temperature ?? "",
+                image: link!.image,
+                description: link!.description,
+                time: link!.hour)
+        }else if indexPath.section == 1{
+            let link = presenter.forecastWeatherView?.collectionViewForHourModels[indexPath.row + roud.count]
+            
+            cell.updateCell(
+                temperature: link?.temperature ?? "",
+                image: link!.image,
+                description: link!.description,
+                time: link!.hour)
+        }else if indexPath.section == 2{
+            let link = presenter.forecastWeatherView?.collectionViewForHourModels[indexPath.row + 8 + roud.count]
+            
+            cell.updateCell(
+                temperature: link?.temperature ?? "",
+                image: link!.image,
+                description: link!.description,
+                time: link!.hour)
+        }else if indexPath.section == 3{
+            let link = presenter.forecastWeatherView?.collectionViewForHourModels[indexPath.row + 16 + roud.count]
+            
+            cell.updateCell(
+                temperature: link?.temperature ?? "",
+                image: link!.image,
+                description: link!.description,
+                time: link!.hour)
+        }else if indexPath.section == 4{
+            let link = presenter.forecastWeatherView?.collectionViewForHourModels[indexPath.row + 24 + roud.count]
+            
+            cell.updateCell(
+                temperature: link?.temperature ?? "",
+                image: link!.image,
+                description: link!.description,
+                time: link!.hour)
+        }else if indexPath.section == 5{
+            let link = presenter.forecastWeatherView?.collectionViewForHourModels[indexPath.row + 32 + roud.count]
+            
+            cell.updateCell(
+                temperature: link?.temperature ?? "",
+                image: link!.image,
+                description: link!.description,
+                time: link!.hour)
+        }
+        
+        
+//        let link = presenter.forecastWeatherView?.collectionViewForHourModels[]
+//
+//        cell.updateCell(
+//            temperature: link?.temperature ?? "",
+//            image: link!.image,
+//            description: link!.description,
+//            time: link!.hour)
+//
         return cell
-        
-        
     }
-    
-    
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 85
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 5
+        return sections.count
     }
+    
+
+
  
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return "FFFFFFFFFFFFF"
+        
+        if (presenter.forecastWeatherView?.days) != nil{
+            switch section{
+            case 0:
+                return sections[0]
+            case 1:
+                return sections[1]
+            case 2:
+                return sections[2]
+            case 3:
+                return sections[3]
+            case 4:
+                return sections[4]
+            case 5:
+                return sections[5]
+            default:
+                return ""
+            }
+        }
+        return ""
     }
-
     
-  
-    
-
     
     
 }
+
+
+
