@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 
 
+<<<<<<< HEAD
 struct CurrentWeatherCollectionViewModel {
     let weatherPicture: UIImage
     let sityLabel: String
@@ -18,6 +19,16 @@ struct CurrentWeatherCollectionViewModel {
 }
 
 
+=======
+struct CurrentWeatherViewModel {
+    let weatherPicture:UIImage
+    let sityLabel:String
+    let weatherLabel:String
+    let tempLabel:String
+    let currentWeatherCollectionModel: CurrentWeatherCollectionModel
+}
+
+>>>>>>> splitViewControllerToTwoScreen
 struct CurrentWeatherCollectionModel {
     let pressure: Pressure
     let humidity: Humidity

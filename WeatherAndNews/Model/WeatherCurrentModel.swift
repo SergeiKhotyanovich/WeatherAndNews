@@ -2,7 +2,7 @@
 import Foundation
 
 // MARK: - WeatherNetwork
-struct WeatherModel: Codable {
+struct WeatherCurrentModel: Codable {
     let coord: Coord
     let weather: [Weather]
     let base: String

@@ -19,4 +19,4 @@ struct SityName: Codable {
     }
 }
 
-typealias Welcome = [SityName]
+typealias LocationCityModel = [SityName]
