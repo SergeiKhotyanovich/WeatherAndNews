@@ -6,7 +6,6 @@
 //
 
 import Foundation
-<<<<<<< HEAD
 import UIKit
 
 
@@ -225,5 +224,3 @@ extension CurrentView: UICollectionViewDelegate, UICollectionViewDataSource, UIC
     
 }
 
-=======
->>>>>>> splitViewControllerToTwoScreen

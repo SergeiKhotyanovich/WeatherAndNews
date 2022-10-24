@@ -6,7 +6,6 @@
 //
 
 import Foundation
-<<<<<<< HEAD
 import UIKit
 
 
@@ -198,5 +197,3 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
         return ""
     }
 }
-=======
->>>>>>> splitViewControllerToTwoScreen
