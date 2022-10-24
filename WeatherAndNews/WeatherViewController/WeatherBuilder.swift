@@ -6,7 +6,7 @@ final class WeatherBuilder {
         let view = WeatherViewController()
         let networkService = NetworkService()
         let locationManager = LocationManager()
-      
+        
         let presenter = WeatherPresenter(view: view, networkService: networkService, locationManager: locationManager)
         
         view.presenter = presenter

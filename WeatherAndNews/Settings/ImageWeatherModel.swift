@@ -46,11 +46,3 @@ enum WeatherImages {
     }
  }
 
-enum WeatherParameters {
-    case temperature, humidity, windSpeed, clouds, pop, rainfallCount, sunRise, sunSet, pressure
-}
-
-enum WeatherType {
-    case forecast, current
-}
-

@@ -61,7 +61,6 @@ class ForecastTableViewCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-//        contentView.backgroundColor = Color.main
         contentView.addSubviews([imageViewForecast, labelTime,labelWeather,labelTemp,labelDescriptions])
         
     }
@@ -72,9 +71,7 @@ class ForecastTableViewCell: UITableViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        
-
-        
+            
         imageViewForecast.snp.makeConstraints { make in
             make.top.bottom.equalToSuperview().inset(7)
             make.left.equalToSuperview().inset(7)
@@ -108,14 +105,6 @@ class ForecastTableViewCell: UITableViewCell {
         labelTime.text = time
         
     }
-    
-    func updateCell(model: [ForecastForHourCollectionViewModel]) {
-        collectionViewModels = model
-//        collectionView.reloadData()
-    }
-    
-
-    
 }
 
 
