@@ -40,13 +40,10 @@ struct List: Codable {
     }
 }
 
-
-
 // MARK: - MainClass
 struct MainClass: Codable {
     let temp, feelsLike, tempMin, tempMax: Double
     let pressure, humidity: Int
-
 
     enum CodingKeys: String, CodingKey {
         case temp

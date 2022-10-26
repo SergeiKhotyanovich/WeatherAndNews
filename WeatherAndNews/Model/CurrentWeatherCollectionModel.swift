@@ -8,9 +8,6 @@
 import Foundation
 import UIKit
 
-
-
-
 struct CurrentWeatherCollectionViewModel {
     let weatherPicture: UIImage
     let sityLabel: String
@@ -18,16 +15,6 @@ struct CurrentWeatherCollectionViewModel {
     let tempLabel: String
     let currentWeatherCollectionModel: CurrentWeatherCollectionModel
 }
-
-
-struct CurrentWeatherViewModel {
-    let weatherPicture:UIImage
-    let sityLabel:String
-    let weatherLabel:String
-    let tempLabel:String
-    let currentWeatherCollectionModel: CurrentWeatherCollectionModel
-}
-
 
 struct CurrentWeatherCollectionModel {
     let pressure: Pressure
@@ -86,3 +73,5 @@ struct TempMin {
     let image = UIImage(systemName: "sun.min")
     let descriptions: String
 }
+
+
