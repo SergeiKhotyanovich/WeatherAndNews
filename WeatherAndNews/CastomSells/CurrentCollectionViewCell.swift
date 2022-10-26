@@ -46,7 +46,6 @@ class CurrentCollectionViewCell: UICollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-
         backView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }

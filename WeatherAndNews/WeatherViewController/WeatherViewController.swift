@@ -22,12 +22,8 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
     let locationButton = UIButton()
     var currentView = CurrentView(frame: .zero)
     var forecastView = ForecastView(frame: .zero)
+    var searchView = SearchView(frame: .zero)
     var buttonIsHidenSearhView = UIButton(type: .system)
-    var sityName = "moscow"
-    var searchView = UIView()
-    var searchOkButton = UIButton(type: .system)
-    var searchTextField = UITextField()
-    let cellSpacingHeight: CGFloat = 40
     
     lazy var pageControll:UISegmentedControl = {
         let items = ["Current", "Forecast"]
@@ -45,10 +41,6 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
             titleNameLabel,searchButoon,locationButton,searchView, pageControll,currentView,forecastView,buttonIsHidenSearhView
         ])
         
-        searchView.addSubviews([
-            searchTextField,searchOkButton
-        ])
-        
         setupLayout()
         setupStyle()
         
@@ -60,7 +52,7 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         pageControll.addTarget(self, action: #selector(changeScreenWeather), for: .allEvents)
         searchButoon.addTarget(self, action: #selector(animateHidenSearchView), for: .touchUpInside)
         buttonIsHidenSearhView.addTarget(self, action: #selector(animateIsHidenSearchView), for: .touchUpInside)
-        searchOkButton.addTarget(self, action: #selector(searchButtonOkPress), for: .touchUpInside)
+        searchView.searchOkButton.addTarget(self, action: #selector(searchButtonOkPress), for: .touchUpInside)
         
         forecastView.isHidden = true
         searchView.alpha = 0
@@ -73,8 +65,6 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         titleNameLabelStyle()
         searchButoonStyle()
         locationButoonStyle()
-        searchTextFieldStyle()
-        searchOkButtonStyle()
     }
     
     func titleNameLabelStyle() {
@@ -105,30 +95,12 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         locationButton.tintColor = Color.secondary
         locationButton.setImage(UIImage(systemName: "location"), for: .normal)
     }
-        
-    func searchTextFieldStyle() {
-        searchTextField.placeholder = " Enter sity"
-        searchTextField.layer.borderWidth = 1.5
-        searchTextField.layer.borderColor = Color.secondary?.cgColor
-        searchTextField.layer.cornerRadius = 15
-        searchTextField.textColor = Color.secondary
-        searchTextField.font = UIFont(name: "ChalkboardSE-Regular", size: 20)
-        let spacerView = UIView(frame:CGRect(x:0, y:0, width:10, height:10))
-        searchTextField.leftViewMode = UITextField.ViewMode.always
-        searchTextField.leftView = spacerView
-    }
-    
-    func searchOkButtonStyle() {
-        searchOkButton.contentVerticalAlignment = .fill
-        searchOkButton.contentHorizontalAlignment = .fill
-        searchOkButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
-        searchOkButton.tintColor = Color.secondary
-    }
     
     @objc func animateHidenSearchView() {
         UIView.animate(withDuration: 0.3) {
             self.searchView.alpha = 1
             self.buttonIsHidenSearhView.backgroundColor = .black
+            self.pageControll.alpha = 0
             self.buttonIsHidenSearhView.alpha = 0.23
         }
     }
@@ -137,6 +109,7 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         UIView.animate(withDuration: 0.3) {
             self.searchView.alpha = 0
             self.buttonIsHidenSearhView.alpha = 0
+            self.pageControll.alpha = 1
         }
     }
     
@@ -178,23 +151,13 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         }
                 
         searchView.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(45)
-            make.right.left.equalToSuperview().inset(65)
-            make.bottom.equalTo(pageControll).inset(50)
+            make.top.equalToSuperview()
+            make.right.left.equalToSuperview()
+            make.bottom.equalTo(pageControll)
         }
         
-        searchTextField.snp.makeConstraints { make in
-            make.top.bottom.equalToSuperview()
-            make.left.equalToSuperview()
-            make.right.equalToSuperview().inset(60)
-        }
-        searchOkButton.snp.makeConstraints { make in
-            make.top.bottom.equalToSuperview()
-            make.left.equalTo(searchTextField.snp.right).offset(10)
-            make.right.equalToSuperview().inset(10)
-        }
         buttonIsHidenSearhView.snp.makeConstraints { make in
-            make.top.equalTo(pageControll)
+            make.top.equalTo(pageControll).inset(35)
             make.right.left.bottom.equalToSuperview()
         }
     }
@@ -202,7 +165,7 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
     //MARK: FUNC
     
     @objc func searchButtonOkPress() {
-        guard let sityName = searchTextField.text else { return }
+        guard let sityName = searchView.searchTextField.text else { return }
         self.presenter.getSearchSity(sity: sityName)
     }
     

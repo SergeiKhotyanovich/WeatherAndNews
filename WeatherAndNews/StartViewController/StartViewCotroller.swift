@@ -14,7 +14,6 @@ class StartViewCotroller: UIViewController, startViewCotrollerProtocol {
     
     public var presenter: startPresenterProtocol!
     
-
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -38,10 +37,7 @@ class StartViewCotroller: UIViewController, startViewCotrollerProtocol {
     @objc func buttonPressed() {
         presenter.fetchButtonPressed()
     }
-    
-    
-    
-    
+
     //MARK: LAYOUT
     
     func setupLayout() {
@@ -67,10 +63,7 @@ class StartViewCotroller: UIViewController, startViewCotrollerProtocol {
             buttonNews.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -view.frame.width/2 + view.frame.width/5),
             buttonNews.topAnchor.constraint(equalTo: buttonWeather.bottomAnchor, constant: view.frame.height/10 )
         ])
-        
-        
     }
-    
     
     //MARK: STYLE
     
