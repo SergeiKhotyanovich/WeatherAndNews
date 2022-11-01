@@ -86,10 +86,5 @@ class StartViewCotroller: UIViewController, startViewCotrollerProtocol {
     func buttonNewsStyle(){
         buttonStyle(text: "Log out", button: buttonNews)
     }
-    
-
-
-    
-
 }
 
