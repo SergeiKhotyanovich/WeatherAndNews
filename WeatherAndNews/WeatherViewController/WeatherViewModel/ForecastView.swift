@@ -5,29 +5,112 @@
 //  Created by Сергей Хотянович on 16.10.22.
 //
 
-import Foundation
+import SnapKit
 import UIKit
 
-
 class ForecastView: UIView {
-
+    
     var tableView = UITableView(frame: .zero, style: .grouped)
     var collectionViewModels: ForecastWeatherViewModel?
     var numberOfSections: [String] = []
     var numberOfRows: [String] = []
     
+    var backView = UIView()
+    var detailedWeatherView = UIView()
+    
+    private let blurView: UIVisualEffectView = {
+        let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.dark)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        return blurEffectView
+    }()
+    
+    private var currentTemperatureLabel: UILabel = {
+        let label = UILabel()
+        label.text = "23°"
+        label.textAlignment = .center
+        label.textColor = Color.secondary
+        label.font = UIFont(name: "MarkerFelt-Wide", size: 200)
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.2
+        return label
+    }()
+
+    private var dayLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Понедельник,"
+        label.textAlignment = .center
+        label.textColor = Color.secondary
+        label.font = UIFont(name: "MarkerFelt-Wide", size: 40)
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.2
+        return label
+    }()
+
+    private var weatherDescriptionLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Sunny"
+        label.textAlignment = .center
+        label.textColor = Color.secondary
+        label.font = UIFont(name: "MarkerFelt-Wide", size: 50)
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.2
+        return label
+    }()
+
+    private lazy var currentWeatherImageView: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(systemName: "sun.max")
+        view.tintColor = Color.secondary
+        view.contentMode = .scaleAspectFit
+        return view
+    }()
+    
+    private var timeLabel: UILabel = {
+        let label = UILabel()
+        label.text = "9:00"
+        label.textAlignment = .center
+        label.textColor = Color.secondary
+        label.font = UIFont(name: "MarkerFelt-Wide", size: 40)
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.2
+        return label
+    }()
+    
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        addSubviews([tableView])
+        addSubviews([
+            tableView,
+            backView
+        ])
+        
+        backView.addSubviews([
+            blurView,
+            detailedWeatherView,
+        ])
+        detailedWeatherView.addSubviews([
+            currentTemperatureLabel, dayLabel,
+            weatherDescriptionLabel, currentWeatherImageView,
+            timeLabel
+        ])
+        
+        blurView.frame = bounds
         setupStyle()
         tableView.delegate = self
         tableView.dataSource = self
+        
         tableView.showsVerticalScrollIndicator = false
+        backView.isHidden = true
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(hideView))
+        blurView.addGestureRecognizer(tap)
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        
     }
     
     override func layoutSubviews() {
@@ -42,17 +125,60 @@ class ForecastView: UIView {
             make.top.bottom.equalToSuperview()
             make.left.right.equalToSuperview().inset(15)
         }
+        backView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        detailedWeatherView.snp.makeConstraints { make in
+            make.height.equalTo(self.frame.width )
+            make.center.equalToSuperview()
+            make.left.right.equalToSuperview().inset(16)
+        }
+        currentWeatherImageView.snp.makeConstraints { make in
+            make.left.top.equalToSuperview().inset(8)
+            make.right.equalTo(backView.snp.centerX)
+            make.height.equalTo((backView.frame.width - 16) / 2)
+        }
+        currentTemperatureLabel.snp.makeConstraints { make in
+            make.left.equalTo(backView.snp.centerX)
+            make.top.right.equalToSuperview()
+            make.bottom.equalTo(currentWeatherImageView.snp.bottom).inset(40)
+        }
+        
+        weatherDescriptionLabel.snp.makeConstraints { make in
+            make.top.equalTo(currentTemperatureLabel.snp.bottom).inset(16)
+            make.left.equalTo(backView.snp.centerX).offset(16)
+            make.bottom.equalTo(currentWeatherImageView.snp.bottom)
+        }
+        
+        dayLabel.snp.makeConstraints { make in
+            make.top.equalTo(currentWeatherImageView.snp.bottom)
+            make.left.equalToSuperview().inset(16)
+        }
+        timeLabel.snp.makeConstraints { make in
+            make.top.equalTo(currentWeatherImageView.snp.bottom)
+            make.left.equalTo(dayLabel.snp.right)
+        }
     }
     
     //MARK: Setuping Style
     
     func setupStyle() {
         tableViewStyle()
+        detailedWeatherViewStyle()
     }
     
     func tableViewStyle() {
         tableView.backgroundColor = UIColor(named: "main")
     }
+    
+    func detailedWeatherViewStyle() {
+        detailedWeatherView.layer.cornerRadius = 10
+        detailedWeatherView.backgroundColor = Color.element
+    }
+    
+    
+    //MARK: Setuping Func
     
     func updateSectionCount(sectionsCount:[String], rowsCount: [String]) {
         numberOfSections = sectionsCount
@@ -65,6 +191,28 @@ class ForecastView: UIView {
         tableView.reloadData()
     }
     
+    @objc private func hideView() {
+        self.detailedWeatherView.transform = CGAffineTransform.identity
+        UIView.animate(withDuration: 0.2, delay: 0) {
+            self.blurView.layer.opacity = 0
+            let transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
+            self.detailedWeatherView.transform = transform
+        } completion: { _ in
+            self.backView.isHidden = true
+        }
+    }
+    func showView(){
+        backView.isHidden = false
+        
+        let transform = CGAffineTransform(scaleX: 0, y: 0)
+        detailedWeatherView.transform = transform
+        blurView.layer.opacity = 0
+        
+        UIView.animate(withDuration: 0.2, delay: 0) {
+            self.blurView.layer.opacity = 1
+            self.detailedWeatherView.transform = CGAffineTransform.identity
+        }
+    }
 }
 
 extension ForecastView: UITableViewDelegate, UITableViewDataSource {
@@ -166,9 +314,9 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
     
-        func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-            return 80
-        }
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 80
+    }
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return numberOfSections.count
@@ -196,4 +344,9 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
         }
         return ""
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        showView()
+    }
 }
+

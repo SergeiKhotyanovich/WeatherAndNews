@@ -9,7 +9,6 @@ protocol weatherViewControllerProtocol: AnyObject {
     func successForecasView()
     func successSectionCount(numberOfSections:[String], numberOfRows:[String])
     func successGettingData(currentWeatherViewModel: CurrentWeatherCollectionViewModel, forecastWeatherViewModel: ForecastWeatherViewModel)
-    //    func apdateView()
 }
 
 class WeatherViewController: UIViewController, weatherViewControllerProtocol {
@@ -23,7 +22,14 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
     var currentView = CurrentView(frame: .zero)
     var forecastView = ForecastView(frame: .zero)
     var searchView = SearchView(frame: .zero)
-    var buttonIsHidenSearhView = UIButton(type: .system)
+//    var buttonIsHidenSearhView = UIButton(type: .system)
+    
+    private let blurView: UIVisualEffectView = {
+        let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.dark)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        return blurEffectView
+    }()
     
     lazy var pageControll:UISegmentedControl = {
         let items = ["Current", "Forecast"]
@@ -38,7 +44,10 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         super.viewDidLoad()
         
         view.addSubviews([
-            titleNameLabel,searchButoon,locationButton,searchView, pageControll,currentView,forecastView,buttonIsHidenSearhView
+            titleNameLabel,searchButoon,
+            locationButton,searchView,
+            pageControll,currentView,
+            forecastView, blurView
         ])
         
         setupLayout()
@@ -51,12 +60,15 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         locationButton.addTarget(self, action: #selector(updateWeatherButtonPressed), for: .touchUpInside)
         pageControll.addTarget(self, action: #selector(changeScreenWeather), for: .allEvents)
         searchButoon.addTarget(self, action: #selector(animateHidenSearchView), for: .touchUpInside)
-        buttonIsHidenSearhView.addTarget(self, action: #selector(animateIsHidenSearchView), for: .touchUpInside)
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(animateIsHidenSearchView))
+        blurView.addGestureRecognizer(tap)
+        
         searchView.searchOkButton.addTarget(self, action: #selector(searchButtonOkPress), for: .touchUpInside)
         
         forecastView.isHidden = true
         searchView.alpha = 0
-        buttonIsHidenSearhView.alpha = 0
+        blurView.alpha = 0
     }
     
     //MARK: STYLE
@@ -99,16 +111,15 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
     @objc func animateHidenSearchView() {
         UIView.animate(withDuration: 0.3) {
             self.searchView.alpha = 1
-            self.buttonIsHidenSearhView.backgroundColor = .black
             self.pageControll.alpha = 0
-            self.buttonIsHidenSearhView.alpha = 0.23
+            self.blurView.alpha = 1
         }
     }
     
     @objc func animateIsHidenSearchView() {
         UIView.animate(withDuration: 0.3) {
             self.searchView.alpha = 0
-            self.buttonIsHidenSearhView.alpha = 0
+            self.blurView.alpha = 0
             self.pageControll.alpha = 1
         }
     }
@@ -156,7 +167,7 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
             make.bottom.equalTo(pageControll)
         }
         
-        buttonIsHidenSearhView.snp.makeConstraints { make in
+        blurView.snp.makeConstraints { make in
             make.top.equalTo(pageControll).inset(35)
             make.right.left.bottom.equalToSuperview()
         }
@@ -193,6 +204,7 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
     
     func successSectionCount(numberOfSections:[String], numberOfRows:[String]) {
         forecastView.updateSectionCount(sectionsCount: numberOfSections, rowsCount: numberOfRows)
+        animateIsHidenSearchView()
     }
     
     @objc func changeScreenWeather(){
