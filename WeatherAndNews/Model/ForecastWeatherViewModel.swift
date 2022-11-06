@@ -17,5 +17,9 @@ struct ForecastForHourCollectionViewModel {
     var temperature: String
     var description: String
     var image: UIImage
-
+    var pressure: String
+    var humidity: String
+    var visibility: String
+    var feelsLike: String
+    var windiness: String
 }

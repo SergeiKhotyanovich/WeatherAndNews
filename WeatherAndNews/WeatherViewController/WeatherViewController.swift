@@ -66,7 +66,7 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         
         searchView.searchOkButton.addTarget(self, action: #selector(searchButtonOkPress), for: .touchUpInside)
         
-        forecastView.isHidden = true
+        currentView.isHidden = true
         searchView.alpha = 0
         blurView.alpha = 0
     }
