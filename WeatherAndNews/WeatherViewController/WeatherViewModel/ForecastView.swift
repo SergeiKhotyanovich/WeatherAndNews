@@ -14,8 +14,9 @@ class ForecastView: UIView {
     var collectionViewModels: ForecastWeatherViewModel?
     var numberOfSections: [String] = []
     var numberOfRows: [String] = []
+    var indexPathRow = 0
     
-    var backView = UIView()
+    private var backView = UIView()
     var detailedWeatherView = UIView()
     
     private let blurView: UIVisualEffectView = {
@@ -25,7 +26,7 @@ class ForecastView: UIView {
         return blurEffectView
     }()
     
-    private var currentTemperatureLabel: UILabel = {
+    private var tempDetailedView: UILabel = {
         let label = UILabel()
         label.text = "23°"
         label.textAlignment = .center
@@ -35,7 +36,7 @@ class ForecastView: UIView {
         label.minimumScaleFactor = 0.2
         return label
     }()
-
+    
     private var dayLabel: UILabel = {
         let label = UILabel()
         label.text = "Понедельник,"
@@ -46,18 +47,19 @@ class ForecastView: UIView {
         label.minimumScaleFactor = 0.2
         return label
     }()
-
+    
     private var weatherDescriptionLabel: UILabel = {
         let label = UILabel()
         label.text = "Sunny"
         label.textAlignment = .center
         label.textColor = Color.secondary
         label.font = UIFont(name: "MarkerFelt-Wide", size: 50)
+        label.numberOfLines = 2
         label.adjustsFontSizeToFitWidth = true
         label.minimumScaleFactor = 0.2
         return label
     }()
-
+    
     private lazy var currentWeatherImageView: UIImageView = {
         let view = UIImageView()
         view.image = UIImage(systemName: "sun.max")
@@ -77,6 +79,21 @@ class ForecastView: UIView {
         return label
     }()
     
+    private lazy var collectionView: UICollectionView = {
+        let view = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: UICollectionViewFlowLayout()
+        )
+        view.showsHorizontalScrollIndicator = false
+        view.showsVerticalScrollIndicator = false
+        view.register(
+            DetailedWeatherCollectionViewCell.self,
+            forCellWithReuseIdentifier: DetailedWeatherCollectionViewCell.identifier
+        )
+        view.backgroundColor = .clear
+        return view
+    }()
+    
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -91,18 +108,20 @@ class ForecastView: UIView {
             detailedWeatherView,
         ])
         detailedWeatherView.addSubviews([
-            currentTemperatureLabel, dayLabel,
+            tempDetailedView, dayLabel,
             weatherDescriptionLabel, currentWeatherImageView,
-            timeLabel
+            timeLabel, collectionView
         ])
         
         blurView.frame = bounds
         setupStyle()
         tableView.delegate = self
         tableView.dataSource = self
+        collectionView.delegate = self
+        collectionView.dataSource = self
         
         tableView.showsVerticalScrollIndicator = false
-        backView.isHidden = true
+        //        backView.isHidden = true
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(hideView))
         blurView.addGestureRecognizer(tap)
@@ -116,6 +135,7 @@ class ForecastView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         setupLayout()
+        setupCollectionViewLayout()
     }
     
     //MARK: Setuping Layout
@@ -139,26 +159,45 @@ class ForecastView: UIView {
             make.right.equalTo(backView.snp.centerX)
             make.height.equalTo((backView.frame.width - 16) / 2)
         }
-        currentTemperatureLabel.snp.makeConstraints { make in
+        tempDetailedView.snp.makeConstraints { make in
             make.left.equalTo(backView.snp.centerX)
             make.top.right.equalToSuperview()
             make.bottom.equalTo(currentWeatherImageView.snp.bottom).inset(40)
         }
         
         weatherDescriptionLabel.snp.makeConstraints { make in
-            make.top.equalTo(currentTemperatureLabel.snp.bottom).inset(16)
+            make.top.equalTo(tempDetailedView.snp.bottom).inset(16)
             make.left.equalTo(backView.snp.centerX).offset(16)
             make.bottom.equalTo(currentWeatherImageView.snp.bottom)
+            make.right.equalToSuperview().inset(8)
         }
         
         dayLabel.snp.makeConstraints { make in
             make.top.equalTo(currentWeatherImageView.snp.bottom)
             make.left.equalToSuperview().inset(16)
+            
         }
         timeLabel.snp.makeConstraints { make in
             make.top.equalTo(currentWeatherImageView.snp.bottom)
             make.left.equalTo(dayLabel.snp.right)
+            make.right.equalToSuperview().inset(8)
+           
         }
+        collectionView.snp.makeConstraints { make in
+            make.top.equalTo(dayLabel.snp.bottom).offset(8)
+            make.left.bottom.right.equalToSuperview().inset(8)
+        }
+    }
+    
+    private func setupCollectionViewLayout() {
+        let layout = UICollectionViewFlowLayout()
+        
+        layout.scrollDirection = .horizontal
+        layout.itemSize = CGSize(width: frame.width / 3 - 16,
+                                 height: collectionView.frame.height / 2 - 16)
+        
+        layout.minimumInteritemSpacing = 8
+        collectionView.collectionViewLayout = layout
     }
     
     //MARK: Setuping Style
@@ -174,7 +213,7 @@ class ForecastView: UIView {
     
     func detailedWeatherViewStyle() {
         detailedWeatherView.layer.cornerRadius = 10
-        detailedWeatherView.backgroundColor = Color.element
+        detailedWeatherView.backgroundColor = Color.main
     }
     
     
@@ -191,6 +230,13 @@ class ForecastView: UIView {
         tableView.reloadData()
     }
     
+    func updateDetailedView(temperature: String, image: UIImage, description: String, time: String) {
+        tempDetailedView.text = temperature + "°C"
+        currentWeatherImageView.image = image
+        weatherDescriptionLabel.text = description
+        timeLabel.text = time
+    }
+    
     @objc private func hideView() {
         self.detailedWeatherView.transform = CGAffineTransform.identity
         UIView.animate(withDuration: 0.2, delay: 0) {
@@ -202,6 +248,7 @@ class ForecastView: UIView {
         }
     }
     func showView(){
+        collectionView.reloadData()
         backView.isHidden = false
         
         let transform = CGAffineTransform(scaleX: 0, y: 0)
@@ -263,52 +310,52 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
         
         if indexPath.section == 0{
             let link = model.collectionViewForHourModels[indexPath.row]
-            
             cell.updateCell(
                 temperature: link.temperature,
                 image: link.image,
                 description: link.description,
                 time: link.hour)
+            
         }else if indexPath.section == 1{
             let link = model.collectionViewForHourModels[indexPath.row + numberOfRows.count]
-            
             cell.updateCell(
                 temperature: link.temperature,
                 image: link.image,
                 description: link.description,
                 time: link.hour)
+            
         }else if indexPath.section == 2{
             let link = model.collectionViewForHourModels[indexPath.row + 8 + numberOfRows.count]
-            
             cell.updateCell(
                 temperature: link.temperature,
                 image: link.image,
                 description: link.description,
                 time: link.hour)
+
         }else if indexPath.section == 3{
             let link = model.collectionViewForHourModels[indexPath.row + 16 + numberOfRows.count]
-            
             cell.updateCell(
                 temperature: link.temperature,
                 image: link.image,
                 description: link.description,
                 time: link.hour)
+            
         }else if indexPath.section == 4{
             let link = model.collectionViewForHourModels[indexPath.row + 24 + numberOfRows.count]
-            
             cell.updateCell(
                 temperature: link.temperature,
                 image: link.image,
                 description: link.description,
                 time: link.hour)
+            
         }else if indexPath.section == 5{
             let link = model.collectionViewForHourModels[indexPath.row + 32 + numberOfRows.count]
-            
             cell.updateCell(
                 temperature: link.temperature,
                 image: link.image,
                 description: link.description,
                 time: link.hour)
+
         }
         
         return cell
@@ -347,6 +394,105 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         showView()
+        
+        guard let model = collectionViewModels else { return }
+        
+        if indexPath.section == 0{
+            let link = model.collectionViewForHourModels[indexPath.row]
+            updateDetailedView(temperature: link.temperature,
+                               image: link.image,
+                               description: link.description,
+                               time: link.hour)
+            dayLabel.text = numberOfSections[0] + ","
+            indexPathRow = indexPath.row
+            
+        }else if indexPath.section == 1{
+            let link = model.collectionViewForHourModels[indexPath.row + numberOfRows.count]
+            updateDetailedView(temperature: link.temperature,
+                               image: link.image,
+                               description: link.description,
+                               time: link.hour)
+            dayLabel.text = numberOfSections[1] + ","
+            indexPathRow = indexPath.row + numberOfRows.count
+            
+        }else if indexPath.section == 2{
+            let link = model.collectionViewForHourModels[indexPath.row + 8 + numberOfRows.count]
+            updateDetailedView(temperature: link.temperature,
+                               image: link.image,
+                               description: link.description,
+                               time: link.hour)
+            dayLabel.text = numberOfSections[2] + ","
+            indexPathRow = indexPath.row + numberOfRows.count + 8
+            
+        }else if indexPath.section == 3{
+            let link = model.collectionViewForHourModels[indexPath.row + 16 + numberOfRows.count]
+            
+            updateDetailedView(temperature: link.temperature,
+                               image: link.image,
+                               description: link.description,
+                               time: link.hour)
+            dayLabel.text = numberOfSections[3] + ","
+            indexPathRow = indexPath.row + numberOfRows.count + 16
+            
+        }else if indexPath.section == 4{
+            let link = model.collectionViewForHourModels[indexPath.row + 24 + numberOfRows.count]
+            
+            updateDetailedView(temperature: link.temperature,
+                               image: link.image,
+                               description: link.description,
+                               time: link.hour)
+            dayLabel.text = numberOfSections[4] + ","
+            indexPathRow = indexPath.row + numberOfRows.count + 24
+            
+        }else if indexPath.section == 5{
+            let link = model.collectionViewForHourModels[indexPath.row + 32 + numberOfRows.count]
+            
+            updateDetailedView(temperature: link.temperature,
+                               image: link.image,
+                               description: link.description,
+                               time: link.hour)
+            dayLabel.text = numberOfSections[5] + ","
+            indexPathRow = indexPath.row + numberOfRows.count + 32
+        }
+    }
+}
+
+extension ForecastView: UICollectionViewDelegate, UICollectionViewDataSource {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        5
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailedWeatherCollectionViewCell.identifier, for: indexPath) as! DetailedWeatherCollectionViewCell
+        
+        switch indexPath.row {
+        case 0:
+            let link = collectionViewModels?.collectionViewForHourModels[indexPathRow]
+            cell.label.text = link?.pressure
+            cell.imageView.image = UIImage(systemName: "thermometer")
+        case 1:
+            let link = collectionViewModels?.collectionViewForHourModels[indexPathRow]
+            cell.label.text = link?.humidity
+            cell.imageView.image = UIImage(systemName: "humidity")
+        case 2:
+            let link = collectionViewModels?.collectionViewForHourModels[indexPathRow]
+            cell.label.text = link?.visibility
+            cell.imageView.image = UIImage(systemName: "eye.fill")
+        case 3:
+            let link = collectionViewModels?.collectionViewForHourModels[indexPathRow]
+            cell.label.text = link?.feelsLike
+            cell.imageView.image = UIImage(systemName: "figure.stand")
+        case 4:
+            let link = collectionViewModels?.collectionViewForHourModels[indexPathRow]
+            cell.label.text = link?.windiness
+            cell.imageView.image = UIImage(systemName: "wind")
+        default:
+            cell.label.text = "111"
+        }
+        
+        return cell
     }
 }
 

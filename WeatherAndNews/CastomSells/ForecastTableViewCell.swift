@@ -103,7 +103,6 @@ class ForecastTableViewCell: UITableViewCell {
         imageViewForecast.image = image
         labelDescriptions.text = description
         labelTime.text = time
-        
     }
 }
 

@@ -126,11 +126,13 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
             let model = ForecastForHourCollectionViewModel(
                 hour: dateFormatter.string(from: Date(timeIntervalSince1970: Double(hour.dt))),
                 temperature: "\(Int(hour.main.temp))",
-                description:
-                    DataSource.weatherIDs[hour.weather[0].id ] ?? "",
-                image: WeatherImages.getWeatherPic(
-                    name: hour.weather[0].icon
-                ) ?? UIImage.systemNamed("sun.max")
+                description: DataSource.weatherIDs[hour.weather[0].id ] ?? "",
+                image: WeatherImages.getWeatherPic(name: hour.weather[0].icon) ?? UIImage.systemNamed("sun.max"),
+                pressure: "\(Int(hour.main.pressure))hPa",
+                humidity: "\(Int(hour.main.humidity))%",
+                visibility: "\(Int(hour.visibility))M",
+                feelsLike: "\(Int(hour.main.feelsLike))°C",
+                windiness: "\(Int(hour.wind.speed))m/s"
             )
             
             hourModel.append(model)
