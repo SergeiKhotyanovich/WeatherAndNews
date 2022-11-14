@@ -6,16 +6,14 @@ import CoreLocation
 protocol weatherPresenterProtocol: NSObject{
     init(view:weatherViewControllerProtocol, networkService: NetworkServiceProtokol, locationManager: LocationManagerProtocol)
     func updateWeatherButtonPressed()
-    func showFitstView()
-    func showSecondView()
     func getWeather(location: Location)
     func getWeatherForecast(location: Location)
-    func getSearchSity(sity: String)
+    func getSearchCity(city: String)
     func getDayOfTheWeek()
     
-    var weatherCurrent: WeatherCurrentModel? {get set}
-    var weatherForecast: WeatherForecastModel? {get set}
-    var cityModel: LocationCityModel?{get set}
+    var weatherCurrentModel: WeatherCurrentModel? {get set}
+    var weatherForecastModel: WeatherForecastModel? {get set}
+    var searсhСityModel: LocationCityModel?{get set}
     var currentWeatherViewModel: CurrentWeatherCollectionViewModel?{ get set }
     var forecastWeatherView: ForecastWeatherViewModel? { get set }
     var numberOfSections:[String]{get set}
@@ -24,11 +22,11 @@ protocol weatherPresenterProtocol: NSObject{
 
 final class WeatherPresenter: NSObject, weatherPresenterProtocol{
     
-    var weatherCurrent: WeatherCurrentModel?
-    var weatherForecast: WeatherForecastModel?
+    var weatherCurrentModel: WeatherCurrentModel?
+    var weatherForecastModel: WeatherForecastModel?
     var forecastWeatherView: ForecastWeatherViewModel?
     var currentWeatherViewModel: CurrentWeatherCollectionViewModel?
-    var cityModel: LocationCityModel?
+    var searсhСityModel: LocationCityModel?
     
     let dateFormatter = DateFormatter()
     let date = NSDate()
@@ -44,8 +42,6 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
         self.locationManager = locationManager
         super.init()
         self.view = view
-        
-        
     }
     
     func updateWeatherButtonPressed() {
@@ -56,12 +52,12 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
         }
     }
     
-    func updateWeatherButtonOKPressed() {
-        guard let sityModel = cityModel else {
+    func updateWeatherButtonUpdatePressed() {
+        guard let searсhСityModel = searсhСityModel else {
             return
         }
-        let location = Location(longitude: String(sityModel.first?.lon ?? 0),
-                                lotitude: String(sityModel.first?.lat ?? 0))
+        let location = Location(longitude: String(searсhСityModel.first?.lon ?? 0),
+                                lotitude: String(searсhСityModel.first?.lat ?? 0))
         
         getWeather(location: location)
         getWeatherForecast(location: location)
@@ -74,8 +70,8 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
             DispatchQueue.main.async {
                 switch result {
                 case .success(let weather):
-                    self.weatherCurrent = weather
-                    self.currentWeatherViewModel = self.prepereCurrentWeatherViewModel(data: self.weatherCurrent!)
+                    self.weatherCurrentModel = weather
+                    self.currentWeatherViewModel = self.prepereCurrentWeatherViewModel(data: self.weatherCurrentModel!)
                     self.view?.success()
                 case .failure(let error):
                     self.view?.failure(error: error)
@@ -90,9 +86,9 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
             DispatchQueue.main.async { [self] in
                 switch result {
                 case .success(let weather):
-                    self.weatherForecast = weather
-                    self.forecastWeatherView = self.prepareForecastWeatherViewModel(data: self.weatherForecast!)
-                    self.updateCurrentView(dataCurrent: self.weatherCurrent!, dataForecast: self.weatherForecast!)
+                    self.weatherForecastModel = weather
+                    self.forecastWeatherView = self.prepareForecastWeatherViewModel(data: self.weatherForecastModel!)
+                    self.updateCurrentView(dataCurrent: self.weatherCurrentModel!, dataForecast: self.weatherForecastModel!)
                     self.view?.successForecasView()
                 case .failure(let error):
                     self.view?.failure(error: error)
@@ -101,14 +97,22 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
         })
     }
     
-    func getSearchSity(sity: String) {
-        networkService.getSearchSity(sity: sity, completion:  { [weak self] result in
+    func getSearchCity(city: String) {
+        networkService.getSearchCity(city: city, completion:  { [weak self] result in
+
             guard let self = self else {return}
             DispatchQueue.main.async {
                 switch result {
-                case .success(let sity):
-                    self.cityModel = sity
-                    self.updateWeatherButtonOKPressed()
+                case .success(let city):
+                    let check = city?.first?.name.count
+                    if check == nil {
+                        self.view?.showAlert()
+                    }else{
+                        self.searсhСityModel = city
+                        self.updateWeatherButtonUpdatePressed()
+                    }
+
+
                 case .failure(let error):
                     self.view?.failure(error: error)
                 }
@@ -120,6 +124,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
         let dateFormatter = DateFormatter()
         var hourModel = [ForecastForHourCollectionViewModel]()
         var daysModels = [ForecastForDayModel]()
+        dateFormatter.locale = Locale(identifier: "en_RU")
         
         for (_, hour) in data.list.enumerated(){
             dateFormatter.dateFormat = "HH:mm"
@@ -148,6 +153,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
     }
     
     func getDayOfTheWeek() {
+        dateFormatter.locale = Locale(identifier: "en_RU")
         dateFormatter.dateFormat = "EEEE"
         let stringDate: String = dateFormatter.string(from: date as Date)
         numberOfSections.append(stringDate)
@@ -175,9 +181,9 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
     func prepereCurrentWeatherViewModel(data: WeatherCurrentModel) -> CurrentWeatherCollectionViewModel {
         let model = CurrentWeatherCollectionViewModel(
             weatherPicture: WeatherImages.getWeatherPic(name: (data.weather[0].icon))!,
-            sityLabel: data.name,
+            cityLabel: data.name,
             weatherLabel: DataSource.weatherIDs[data.weather[0].id]!,
-            tempLabel: "\(Int(data.main.temp))°C",
+            tempLabel: "\(Int(data.main.temp))°",
             currentWeatherCollectionModel: CurrentWeatherCollectionModel(
                 pressure: Pressure(descriptions: "\(data.main.pressure)hPa"),
                 humidity: Humidity(descriptions: "\(data.main.humidity)%"),
@@ -197,22 +203,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
             let currentWeatherViewModel = self.prepereCurrentWeatherViewModel(data: dataCurrent)
             let forecastWeatherViewModel = self.prepareForecastWeatherViewModel(data: dataForecast)
             self.view?.successGettingData(currentWeatherViewModel: currentWeatherViewModel, forecastWeatherViewModel: forecastWeatherViewModel)
-            
         }
-    }
-    
-    func updateForecastView(data: WeatherForecastModel) {
-        DispatchQueue.main.async {
-           
-        }
-    }
-    
-    func showFitstView() {
-        
-    }
-    
-    func showSecondView() {
-        
     }
 }
 

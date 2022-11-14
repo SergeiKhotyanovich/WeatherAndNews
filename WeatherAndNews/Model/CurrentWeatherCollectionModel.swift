@@ -10,7 +10,7 @@ import UIKit
 
 struct CurrentWeatherCollectionViewModel {
     let weatherPicture: UIImage
-    let sityLabel: String
+    let cityLabel: String
     let weatherLabel: String
     let tempLabel: String
     let currentWeatherCollectionModel: CurrentWeatherCollectionModel

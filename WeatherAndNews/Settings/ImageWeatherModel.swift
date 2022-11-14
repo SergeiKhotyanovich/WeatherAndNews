@@ -5,7 +5,7 @@ import UIKit
 enum WeatherImages {
 
     static private let condition = [
-        (image: UIImage.systemNamed("sun.max.fill"), name: "01d"),
+        (image: UIImage.systemNamed("sun.max.fill"), name: "01n"),
         (image: UIImage.systemNamed("moon.fill"), name: "01d"),
         (image: UIImage.systemNamed("cloud.sun.fill"), name: "02d"),
         (image: UIImage.systemNamed("cloud.moon.fill"), name: "02n"),

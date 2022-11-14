@@ -13,13 +13,13 @@ class CurrentView: UIView {
     
     private let tempLabel = UILabel()
     private let weatherPicture = UIImageView()
-    private let sityLabel = UILabel()
-    private let weatherLabel = UILabel()
+    private let cityNameLabel = UILabel()
+    private let weatherDescriptionLabel = UILabel()
     private let bigScreenWidth = 570
 
     private var collectionViewModels: CurrentWeatherCollectionViewModel?
     
-    private let collectionView: UICollectionView = {
+    private let currentCollectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())
         view.showsHorizontalScrollIndicator = false
         view.showsVerticalScrollIndicator = false
@@ -30,11 +30,11 @@ class CurrentView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        addSubviews([tempLabel,weatherPicture,sityLabel,weatherLabel,collectionView])
+        addSubviews([tempLabel,weatherPicture,cityNameLabel,weatherDescriptionLabel,currentCollectionView])
         setupStyle()
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.backgroundColor = .clear
+        currentCollectionView.delegate = self
+        currentCollectionView.dataSource = self
+        currentCollectionView.backgroundColor = .clear
     }
     
     required init?(coder: NSCoder) {
@@ -60,26 +60,27 @@ class CurrentView: UIView {
         weatherPicture.snp.makeConstraints { make in
             make.width.equalTo(self.frame.width/2)
             make.height.equalTo(self.frame.width/2 - 20)
-            make.right.equalToSuperview()
-            make.top.equalToSuperview().inset(20)
+            make.right.equalToSuperview().inset(8)
+            make.top.equalToSuperview()
         }
         
-        sityLabel.snp.makeConstraints { make in
-            make.top.equalTo(tempLabel.snp.bottom)
-            make.left.equalToSuperview()
+        cityNameLabel.snp.makeConstraints { make in
+            make.top.equalTo(tempLabel.snp.bottom).inset(25)
+            make.left.equalToSuperview().inset(8)
             make.right.equalTo(self.snp.centerX)
-            make.height.equalTo(self.frame.width/7)
+            make.height.equalTo(self.frame.width/5)
         }
         
-        weatherLabel.snp.makeConstraints { make in
+        weatherDescriptionLabel.snp.makeConstraints { make in
             make.top.equalTo(weatherPicture.snp.bottom)
-            make.right.equalToSuperview()
-            make.left.equalTo(self.snp.centerX)
-            make.height.equalTo(self.frame.width/7)
+            make.right.equalToSuperview().inset(8)
+            make.left.equalTo(self.snp.centerX).offset(8)
+            make.height.equalTo(self.frame.width/5)
+            make.bottom.equalTo(currentCollectionView.snp.top).inset(-16)
         }
         
-        collectionView.snp.makeConstraints { make in
-            make.top.equalTo(sityLabel.snp.bottom).offset(16)
+        currentCollectionView.snp.makeConstraints { make in
+            make.top.equalTo(cityNameLabel.snp.bottom).offset(16)
             make.right.left.equalTo(self).inset(16)
             make.bottom.equalTo(self).inset(4)
         }
@@ -91,25 +92,25 @@ class CurrentView: UIView {
             layout.scrollDirection = .vertical
             layout.itemSize = CGSize(
                 width: frame.width / 3 - 16,
-                height: collectionView.frame.height / 3 - 8
+                height: currentCollectionView.frame.height / 3 - 8
             )
         } else {
             layout.scrollDirection = .horizontal
             layout.itemSize = CGSize(
                 width: ((frame.width / 3) - 16 ),
-                height: (collectionView.frame.height - 32)
+                height: (currentCollectionView.frame.height - 32)
             )
         }
         layout.minimumLineSpacing = 8
         layout.minimumInteritemSpacing = 1
-        collectionView.collectionViewLayout = layout
+        currentCollectionView.collectionViewLayout = layout
     }
     
     //MARK: Setuping Style
     
     func setupStyle() {
         tempLabelStyle()
-        sityLabelStyle()
+        cityLabelStyle()
         weatherLabelStyle()
         weatherPictureStyle()
     }
@@ -123,23 +124,24 @@ class CurrentView: UIView {
         tempLabel.numberOfLines = 0
     }
     
-    func sityLabelStyle() {
-        sityLabel.text = "Minsk"
-        sityLabel.textAlignment = .center
-        sityLabel.textColor = Color.secondary
-        sityLabel.font = UIFont(name: "ChalkboardSE-Regular", size: 100)
-        sityLabel.adjustsFontSizeToFitWidth = true
-        sityLabel.minimumScaleFactor = 0.2
+    func cityLabelStyle() {
+        cityNameLabel.text = "Minsk"
+        cityNameLabel.textAlignment = .center
+        cityNameLabel.textColor = Color.secondary
+        cityNameLabel.font = UIFont(name: "ChalkboardSE-Regular", size: 40)
+        cityNameLabel.adjustsFontSizeToFitWidth = true
+        cityNameLabel.minimumScaleFactor = 0.6
+        cityNameLabel.numberOfLines = 2
     }
     
     func weatherLabelStyle() {
-        weatherLabel.text = "Sunny"
-        weatherLabel.textAlignment = .center
-        weatherLabel.textColor = Color.secondary
-        weatherLabel.font = UIFont(name: "ChalkboardSE-Regular", size: 100)
-        weatherLabel.adjustsFontSizeToFitWidth = true
-        weatherLabel.minimumScaleFactor = 0.01
-        weatherLabel.numberOfLines = 0
+        weatherDescriptionLabel.text = "Sunny"
+        weatherDescriptionLabel.textAlignment = .center
+        weatherDescriptionLabel.textColor = Color.secondary
+        weatherDescriptionLabel.font = UIFont(name: "ChalkboardSE-Regular", size: 40)
+        weatherDescriptionLabel.adjustsFontSizeToFitWidth = true
+        weatherDescriptionLabel.minimumScaleFactor = 0.6
+        weatherDescriptionLabel.numberOfLines = 0
     }
     
     func weatherPictureStyle() {
@@ -147,12 +149,15 @@ class CurrentView: UIView {
     }
 
     func updateView(model: CurrentWeatherCollectionViewModel) {
-        weatherPicture.image = model.weatherPicture
-        sityLabel.text = model.sityLabel
-        weatherLabel.text = model.weatherLabel
-        tempLabel.text = model.tempLabel
+        
+        UIView.animate(withDuration: 2, delay: 0) {
+            self.weatherPicture.image = model.weatherPicture
+            self.cityNameLabel.text = model.cityLabel
+            self.weatherDescriptionLabel.text = model.weatherLabel
+            self.tempLabel.text = model.tempLabel
+            self.currentCollectionView.reloadData()
+        }
         collectionViewModels = model
-        collectionView.reloadData()
     }
 }
 
@@ -217,7 +222,7 @@ extension CurrentView: UICollectionViewDelegate, UICollectionViewDataSource, UIC
             }
             cell.imageView.image = model?.currentWeatherCollectionModel.tempMin.image
         default:
-            cell.label.text = model?.sityLabel
+            cell.label.text = model?.cityLabel
         }
         return cell
     }

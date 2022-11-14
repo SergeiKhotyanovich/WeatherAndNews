@@ -9,6 +9,7 @@ protocol weatherViewControllerProtocol: AnyObject {
     func successForecasView()
     func successSectionCount(numberOfSections:[String], numberOfRows:[String])
     func successGettingData(currentWeatherViewModel: CurrentWeatherCollectionViewModel, forecastWeatherViewModel: ForecastWeatherViewModel)
+    func showAlert()
 }
 
 class WeatherViewController: UIViewController, weatherViewControllerProtocol {
@@ -18,11 +19,10 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
     
     let titleNameLabel = UILabel()
     let searchButoon = UIButton(type: .system)
-    let locationButton = UIButton()
+    let updateLocationButton = UIButton()
     var currentView = CurrentView(frame: .zero)
     var forecastView = ForecastView(frame: .zero)
     var searchView = SearchView(frame: .zero)
-//    var buttonIsHidenSearhView = UIButton(type: .system)
     
     private let blurView: UIVisualEffectView = {
         let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.dark)
@@ -40,14 +40,21 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         return view
     }()
     
+    var loadViewIndicator: UIActivityIndicatorView = {
+        var spiner = UIActivityIndicatorView(style: .large)
+        spiner.color = Color.secondary
+        spiner.hidesWhenStopped = true
+        return spiner
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.addSubviews([
             titleNameLabel,searchButoon,
-            locationButton,searchView,
-            pageControll,currentView,
-            forecastView, blurView
+            updateLocationButton,searchView,
+            pageControll, currentView,
+            forecastView, blurView, loadViewIndicator
         ])
         
         setupLayout()
@@ -57,18 +64,20 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         
         view.backgroundColor = UIColor(named: "main")
         
-        locationButton.addTarget(self, action: #selector(updateWeatherButtonPressed), for: .touchUpInside)
+        updateLocationButton.addTarget(self, action: #selector(updateWeatherButtonPressed), for: .touchUpInside)
         pageControll.addTarget(self, action: #selector(changeScreenWeather), for: .allEvents)
         searchButoon.addTarget(self, action: #selector(animateHidenSearchView), for: .touchUpInside)
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(animateIsHidenSearchView))
         blurView.addGestureRecognizer(tap)
         
-        searchView.searchOkButton.addTarget(self, action: #selector(searchButtonOkPress), for: .touchUpInside)
+        searchView.updateSearchButton.addTarget(self, action: #selector(searchUpdateButtonPress), for: .touchUpInside)
         
-        currentView.isHidden = true
+        forecastView.isHidden = true
         searchView.alpha = 0
         blurView.alpha = 0
+        
+        loadViewIndicator.center = view.center
     }
     
     //MARK: STYLE
@@ -99,13 +108,13 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
     }
     
     func locationButoonStyle() {
-        locationButton.contentVerticalAlignment = .fill
-        locationButton.contentHorizontalAlignment = .fill
-        locationButton.snp.makeConstraints { make in
+        updateLocationButton.contentVerticalAlignment = .fill
+        updateLocationButton.contentHorizontalAlignment = .fill
+        updateLocationButton.snp.makeConstraints { make in
             make.width.height.equalTo(25)
         }
-        locationButton.tintColor = Color.secondary
-        locationButton.setImage(UIImage(systemName: "location"), for: .normal)
+        updateLocationButton.tintColor = Color.secondary
+        updateLocationButton.setImage(UIImage(systemName: "location"), for: .normal)
     }
     
     @objc func animateHidenSearchView() {
@@ -139,7 +148,7 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
             make.top.equalToSuperview().inset(50)
         }
         
-        locationButton.snp.makeConstraints { make in
+        updateLocationButton.snp.makeConstraints { make in
             make.left.equalTo(searchButoon.snp.right).offset(10)
             make.top.equalToSuperview().inset(50)
         }
@@ -171,22 +180,28 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
             make.top.equalTo(pageControll).inset(35)
             make.right.left.bottom.equalToSuperview()
         }
+//        spiner.snp.makeConstraints { make in
+//            make.top.right.left.bottom.equalToSuperview()
+//        }
     }
     
     //MARK: FUNC
     
-    @objc func searchButtonOkPress() {
-        guard let sityName = searchView.searchTextField.text else { return }
-        self.presenter.getSearchSity(sity: sityName)
+    @objc func searchUpdateButtonPress() {
+        guard let cityName = searchView.searchTextField.text else { return }
+        print(cityName)
+        self.presenter.getSearchCity(city: cityName)
+        showLoadViewIndicator()
     }
     
     
     @objc func updateWeatherButtonPressed() {
         self.presenter.updateWeatherButtonPressed()
+        showLoadViewIndicator()
     }
     
     @objc func setAnotherView() {
-        self.presenter.showFitstView()
+//        self.presenter.showFitstView()
         
     }
     
@@ -207,6 +222,21 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         animateIsHidenSearchView()
     }
     
+    func showLoadViewIndicator() {
+        
+        UIView.animate(withDuration: 0.2) {
+            self.blurView.alpha = 1
+            self.loadViewIndicator.startAnimating()
+        }
+    }
+    
+    func hideLoadViewIndicator() {
+        UIView.animate(withDuration: 0.1) {
+            self.blurView.alpha = 0
+            self.loadViewIndicator.stopAnimating()
+        }
+    }
+    
     @objc func changeScreenWeather(){
         switch pageControll.selectedSegmentIndex{
         case 0:
@@ -223,5 +253,16 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
     func successGettingData(currentWeatherViewModel: CurrentWeatherCollectionViewModel, forecastWeatherViewModel: ForecastWeatherViewModel) {
         currentView.updateView(model: currentWeatherViewModel)
         forecastView.updateView(model: forecastWeatherViewModel)
+        hideLoadViewIndicator()
+    }
+    
+    func showAlert() {
+        let alertController = UIAlertController(title: "Error", message: "This city doesn't exist", preferredStyle: .alert)
+        let alertAction = UIAlertAction(title: "Cancel", style: .cancel) {_ in
+            self.hideLoadViewIndicator()
+            self.animateIsHidenSearchView()
+        }
+        alertController.addAction(alertAction)
+        present(alertController, animated: true)
     }
 }

@@ -10,7 +10,7 @@ import UIKit
 
 class ForecastView: UIView {
     
-    var tableView = UITableView(frame: .zero, style: .grouped)
+    var forecastTableView = UITableView(frame: .zero, style: .grouped)
     var collectionViewModels: ForecastWeatherViewModel?
     var numberOfSections: [String] = []
     var numberOfRows: [String] = []
@@ -37,7 +37,7 @@ class ForecastView: UIView {
         return label
     }()
     
-    private var dayLabel: UILabel = {
+    private var dayOfTheWeekLabel: UILabel = {
         let label = UILabel()
         label.text = "Понедельник,"
         label.textAlignment = .center
@@ -79,7 +79,7 @@ class ForecastView: UIView {
         return label
     }()
     
-    private lazy var collectionView: UICollectionView = {
+    private lazy var detailedWeatherСollectionView: UICollectionView = {
         let view = UICollectionView(
             frame: .zero,
             collectionViewLayout: UICollectionViewFlowLayout()
@@ -99,7 +99,7 @@ class ForecastView: UIView {
         super.init(frame: frame)
         
         addSubviews([
-            tableView,
+            forecastTableView,
             backView
         ])
         
@@ -108,20 +108,20 @@ class ForecastView: UIView {
             detailedWeatherView,
         ])
         detailedWeatherView.addSubviews([
-            tempDetailedView, dayLabel,
+            tempDetailedView, dayOfTheWeekLabel,
             weatherDescriptionLabel, currentWeatherImageView,
-            timeLabel, collectionView
+            timeLabel, detailedWeatherСollectionView
         ])
         
         blurView.frame = bounds
         setupStyle()
-        tableView.delegate = self
-        tableView.dataSource = self
-        collectionView.delegate = self
-        collectionView.dataSource = self
+        forecastTableView.delegate = self
+        forecastTableView.dataSource = self
+        detailedWeatherСollectionView.delegate = self
+        detailedWeatherСollectionView.dataSource = self
         
-        tableView.showsVerticalScrollIndicator = false
-        //        backView.isHidden = true
+        forecastTableView.showsVerticalScrollIndicator = false
+        backView.isHidden = true
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(hideView))
         blurView.addGestureRecognizer(tap)
@@ -141,7 +141,7 @@ class ForecastView: UIView {
     //MARK: Setuping Layout
     
     func setupLayout() {
-        tableView.snp.makeConstraints { make in
+        forecastTableView.snp.makeConstraints { make in
             make.top.bottom.equalToSuperview()
             make.left.right.equalToSuperview().inset(15)
         }
@@ -172,19 +172,20 @@ class ForecastView: UIView {
             make.right.equalToSuperview().inset(8)
         }
         
-        dayLabel.snp.makeConstraints { make in
+        dayOfTheWeekLabel.snp.makeConstraints { make in
             make.top.equalTo(currentWeatherImageView.snp.bottom)
             make.left.equalToSuperview().inset(16)
+            make.right.equalTo(detailedWeatherView.snp.centerX).inset(8)
             
         }
         timeLabel.snp.makeConstraints { make in
             make.top.equalTo(currentWeatherImageView.snp.bottom)
-            make.left.equalTo(dayLabel.snp.right)
+            make.left.equalTo(dayOfTheWeekLabel.snp.right)
             make.right.equalToSuperview().inset(8)
            
         }
-        collectionView.snp.makeConstraints { make in
-            make.top.equalTo(dayLabel.snp.bottom).offset(8)
+        detailedWeatherСollectionView.snp.makeConstraints { make in
+            make.top.equalTo(dayOfTheWeekLabel.snp.bottom).offset(8)
             make.left.bottom.right.equalToSuperview().inset(8)
         }
     }
@@ -194,10 +195,10 @@ class ForecastView: UIView {
         
         layout.scrollDirection = .horizontal
         layout.itemSize = CGSize(width: frame.width / 3 - 16,
-                                 height: collectionView.frame.height / 2 - 16)
+                                 height: detailedWeatherСollectionView.frame.height / 2 - 16)
         
         layout.minimumInteritemSpacing = 8
-        collectionView.collectionViewLayout = layout
+        detailedWeatherСollectionView.collectionViewLayout = layout
     }
     
     //MARK: Setuping Style
@@ -208,7 +209,7 @@ class ForecastView: UIView {
     }
     
     func tableViewStyle() {
-        tableView.backgroundColor = UIColor(named: "main")
+        forecastTableView.backgroundColor = UIColor(named: "main")
     }
     
     func detailedWeatherViewStyle() {
@@ -227,7 +228,7 @@ class ForecastView: UIView {
     
     func updateView(model: ForecastWeatherViewModel) {
         collectionViewModels = model
-        tableView.reloadData()
+        forecastTableView.reloadData()
     }
     
     func updateDetailedView(temperature: String, image: UIImage, description: String, time: String) {
@@ -248,7 +249,7 @@ class ForecastView: UIView {
         }
     }
     func showView(){
-        collectionView.reloadData()
+        detailedWeatherСollectionView.reloadData()
         backView.isHidden = false
         
         let transform = CGAffineTransform(scaleX: 0, y: 0)
@@ -355,7 +356,6 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
                 image: link.image,
                 description: link.description,
                 time: link.hour)
-
         }
         
         return cell
@@ -403,7 +403,7 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
                                image: link.image,
                                description: link.description,
                                time: link.hour)
-            dayLabel.text = numberOfSections[0] + ","
+            dayOfTheWeekLabel.text = numberOfSections[0] + ","
             indexPathRow = indexPath.row
             
         }else if indexPath.section == 1{
@@ -412,7 +412,7 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
                                image: link.image,
                                description: link.description,
                                time: link.hour)
-            dayLabel.text = numberOfSections[1] + ","
+            dayOfTheWeekLabel.text = numberOfSections[1] + ","
             indexPathRow = indexPath.row + numberOfRows.count
             
         }else if indexPath.section == 2{
@@ -421,7 +421,7 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
                                image: link.image,
                                description: link.description,
                                time: link.hour)
-            dayLabel.text = numberOfSections[2] + ","
+            dayOfTheWeekLabel.text = numberOfSections[2] + ","
             indexPathRow = indexPath.row + numberOfRows.count + 8
             
         }else if indexPath.section == 3{
@@ -431,7 +431,7 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
                                image: link.image,
                                description: link.description,
                                time: link.hour)
-            dayLabel.text = numberOfSections[3] + ","
+            dayOfTheWeekLabel.text = numberOfSections[3] + ","
             indexPathRow = indexPath.row + numberOfRows.count + 16
             
         }else if indexPath.section == 4{
@@ -441,7 +441,7 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
                                image: link.image,
                                description: link.description,
                                time: link.hour)
-            dayLabel.text = numberOfSections[4] + ","
+            dayOfTheWeekLabel.text = numberOfSections[4] + ","
             indexPathRow = indexPath.row + numberOfRows.count + 24
             
         }else if indexPath.section == 5{
@@ -451,7 +451,7 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
                                image: link.image,
                                description: link.description,
                                time: link.hour)
-            dayLabel.text = numberOfSections[5] + ","
+            dayOfTheWeekLabel.text = numberOfSections[5] + ","
             indexPathRow = indexPath.row + numberOfRows.count + 32
         }
     }

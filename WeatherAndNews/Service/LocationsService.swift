@@ -21,6 +21,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate, LocationManagerProto
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
             locationManager.pausesLocationUpdatesAutomatically = true
+            locationManager.activityType = .automotiveNavigation
             locationManager.startUpdatingLocation()
         }
     }
@@ -31,7 +32,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate, LocationManagerProto
             let langitude = String(format:"%f", lastLocatin.coordinate.longitude)
             print(latitude,langitude)
             
-            location?(Location(longitude: langitude, lotitude: latitude)) 
+            location?(Location(longitude: langitude, lotitude: latitude))
+            locationManager.stopUpdatingLocation()
             
             
             

@@ -5,11 +5,10 @@ import CoreLocation
 protocol NetworkServiceProtokol: NSObject {
     func getWeather(location: Location, completion: @escaping (Result<WeatherCurrentModel?, Error>) -> Void )
     func getWeatherForecast(location: Location, completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void)
-    func getSearchSity(sity: String, completion: @escaping (Result<LocationCityModel?, Error>) -> Void)
+    func getSearchCity(city: String, completion: @escaping (Result<LocationCityModel?, Error>) -> Void)
 }
 
 class NetworkService:NSObject, NetworkServiceProtokol {
-    
     
     func getWeather(location: Location, completion: @escaping (Result<WeatherCurrentModel?, Error>) -> Void) {
         let urlString = "https://api.openweathermap.org/data/2.5/weather?lat=\(location.lotitude)&lon=\(location.longitude)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=metric"
@@ -24,6 +23,7 @@ class NetworkService:NSObject, NetworkServiceProtokol {
             do {
                 let obj = try JSONDecoder().decode(WeatherCurrentModel.self, from: data!)
                 completion(.success(obj))
+                print(obj)
             } catch{
                 completion(.failure(error))
             }
@@ -49,15 +49,15 @@ class NetworkService:NSObject, NetworkServiceProtokol {
         }.resume()
     }
     
-    func getSearchSity(sity: String,  completion: @escaping (Result<LocationCityModel?, Error>) -> Void) {
-        let urlString = "http://api.openweathermap.org/geo/1.0/direct?q=\(sity)&limit=5&appid=fe0a8df10334d41e9f5615b5cbca266f"
+    func getSearchCity(city: String,  completion: @escaping (Result<LocationCityModel?, Error>) -> Void) {
+        let urlString = "http://api.openweathermap.org/geo/1.0/direct?q=\(city)&limit=5&appid=fe0a8df10334d41e9f5615b5cbca266f"
         
         guard let url = URL(string: urlString) else {return}
         let urlRequest = URLRequest(url: url)
+
         
-        URLSession.shared.dataTask(with: urlRequest) { data, response, error in
+        URLSession.shared.dataTask(with: urlRequest) {  data, response, error in
             guard let data = data else { return }
-            
             do {
                 let obj = try JSONDecoder().decode(LocationCityModel.self, from: data)
                 completion(.success(obj))
