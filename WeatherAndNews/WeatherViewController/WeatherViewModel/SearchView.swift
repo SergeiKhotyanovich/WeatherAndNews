@@ -11,15 +11,15 @@ import UIKit
 
 class SearchView: UIView {
     
-    var searchOkButton = UIButton(type: .system)
+    var updateSearchButton = UIButton(type: .system)
     var searchTextField = UITextField()
-    let popularCities = [
+    let popularCitiesModel = [
         "Moscow", "Delhi", "Pattaya", "Beijing",
         "Toronto", "Jerusalem", "London", "Honolulu",
         "Sydney"
     ]
     
-    private let searchCollectionView: UICollectionView = {
+    private let popularCitiesCollectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())
         view.showsHorizontalScrollIndicator = false
         view.showsVerticalScrollIndicator = false
@@ -31,14 +31,14 @@ class SearchView: UIView {
         super.init(frame: frame)
         
         addSubviews([
-            searchTextField,searchOkButton, searchCollectionView
+            searchTextField,updateSearchButton, popularCitiesCollectionView
         ])
         
         setupStyle()
         
-        searchCollectionView.delegate = self
-        searchCollectionView.dataSource = self
-        searchCollectionView.backgroundColor = .clear
+        popularCitiesCollectionView.delegate = self
+        popularCitiesCollectionView.dataSource = self
+        popularCitiesCollectionView.backgroundColor = .clear
         
     }
     
@@ -61,12 +61,12 @@ class SearchView: UIView {
             make.left.equalToSuperview().inset(60)
             make.right.equalToSuperview().inset(90)
         }
-        searchOkButton.snp.makeConstraints { make in
+        updateSearchButton.snp.makeConstraints { make in
             make.top.bottom.equalToSuperview().inset(50)
             make.left.equalTo(searchTextField.snp.right).offset(10)
             make.right.equalToSuperview().inset(45)
         }
-        searchCollectionView.snp.makeConstraints { make in
+        popularCitiesCollectionView.snp.makeConstraints { make in
             make.top.equalTo(searchTextField.snp.bottom)
             make.right.left.equalTo(self).inset(20)
             make.bottom.equalTo(self)
@@ -82,18 +82,18 @@ class SearchView: UIView {
                 height: 70
             )
         layout.minimumLineSpacing = 3
-        searchCollectionView.collectionViewLayout = layout
+        popularCitiesCollectionView.collectionViewLayout = layout
     }
     
     //MARK: Setuping Style
     
     func setupStyle() {
-        searchTextFieldStyle()
-        searchOkButtonStyle()
+        updateSearchTextFieldStyle()
+        updateSearchButtonStyle()
     }
     
-    func searchTextFieldStyle() {
-        searchTextField.placeholder = " Enter sity"
+    func updateSearchTextFieldStyle() {
+        searchTextField.placeholder = " Enter city"
         searchTextField.layer.borderWidth = 1.5
         searchTextField.layer.borderColor = Color.secondary?.cgColor
         searchTextField.layer.cornerRadius = 15
@@ -102,36 +102,34 @@ class SearchView: UIView {
         let spacerView = UIView(frame:CGRect(x:0, y:0, width:10, height:10))
         searchTextField.leftViewMode = UITextField.ViewMode.always
         searchTextField.leftView = spacerView
+        searchTextField.clearButtonMode = .always
     }
     
-    func searchOkButtonStyle() {
-        searchOkButton.contentVerticalAlignment = .fill
-        searchOkButton.contentHorizontalAlignment = .fill
-        searchOkButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
-        searchOkButton.tintColor = Color.secondary
+    func updateSearchButtonStyle() {
+        updateSearchButton.contentVerticalAlignment = .fill
+        updateSearchButton.contentHorizontalAlignment = .fill
+        updateSearchButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        updateSearchButton.tintColor = Color.secondary
     }
-
 }
 
 //MARK: extension SearchView
 
 extension SearchView: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return popularCities.count
+        return popularCitiesModel.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = searchCollectionView.dequeueReusableCell(withReuseIdentifier: SearchCollectionViewCell.identifier, for: indexPath) as! SearchCollectionViewCell
+        let cell = popularCitiesCollectionView.dequeueReusableCell(withReuseIdentifier: SearchCollectionViewCell.identifier, for: indexPath) as! SearchCollectionViewCell
         
-        cell.label.text = popularCities[indexPath.row]
-        
-     
+        cell.label.text = popularCitiesModel[indexPath.row]
         
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        searchTextField.text = popularCities[indexPath.row]
+        searchTextField.text = popularCitiesModel[indexPath.row]
     }
     
 

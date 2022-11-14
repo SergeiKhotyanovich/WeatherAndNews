@@ -6,7 +6,7 @@
 import Foundation
 
 // MARK: - WelcomeElement
-struct SityName: Codable {
+struct CityName: Codable {
     let name: String
     let localNames: [String: String]?
     let lat, lon: Double
@@ -19,4 +19,4 @@ struct SityName: Codable {
     }
 }
 
-typealias LocationCityModel = [SityName]
+typealias LocationCityModel = [CityName]
