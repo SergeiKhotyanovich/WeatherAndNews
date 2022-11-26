@@ -2,7 +2,7 @@
 import UIKit
 import SnapKit
 
-protocol weatherViewControllerProtocol: AnyObject {
+protocol WeatherViewControllerProtocol: AnyObject {
     func setAnotherView()
     func success()
     func failure(error: Error)
@@ -12,7 +12,7 @@ protocol weatherViewControllerProtocol: AnyObject {
     func showAlert()
 }
 
-class WeatherViewController: UIViewController, weatherViewControllerProtocol {
+class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     
     public var presenter: weatherPresenterProtocol!
     private var forecastViewModel: ForecastWeatherViewModel?
@@ -23,6 +23,7 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
     var currentView = CurrentView(frame: .zero)
     var forecastView = ForecastView(frame: .zero)
     var searchView = SearchView(frame: .zero)
+    let notificationCenter = NotificationCenter.default
     
     private let blurView: UIVisualEffectView = {
         let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.dark)
@@ -78,6 +79,9 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         blurView.alpha = 0
         
         loadViewIndicator.center = view.center
+        
+        notificationCenter.addObserver(self, selector: #selector(mapViewWeatherLocation) , name: NSNotification.Name.mapViewWeatherLocation, object: nil)
+        
     }
     
     //MARK: STYLE
@@ -180,8 +184,8 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
             make.top.equalTo(pageControll).inset(35)
             make.right.left.bottom.equalToSuperview()
         }
-//        spiner.snp.makeConstraints { make in
-//            make.top.right.left.bottom.equalToSuperview()
+//       spiner.snp.makeConstraints { make in
+//          make.top.right.left.bottom.equalToSuperview()
 //        }
     }
     
@@ -189,7 +193,6 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
     
     @objc func searchUpdateButtonPress() {
         guard let cityName = searchView.searchTextField.text else { return }
-        print(cityName)
         self.presenter.getSearchCity(city: cityName)
         showLoadViewIndicator()
     }
@@ -200,9 +203,15 @@ class WeatherViewController: UIViewController, weatherViewControllerProtocol {
         showLoadViewIndicator()
     }
     
+    @objc func mapViewWeatherLocation(notification: Notification) {
+        guard let coordinate = notification.userInfo as? [String : Location] else { return }
+        guard let location = coordinate["location"] else { return }
+        presenter.updateMapViewWeatherButtonPressed(location: location)
+    }
+    
+    
     @objc func setAnotherView() {
 //        self.presenter.showFitstView()
-        
     }
     
     func success() {

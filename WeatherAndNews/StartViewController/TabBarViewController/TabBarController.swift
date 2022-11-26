@@ -5,14 +5,13 @@ import SnapKit
 class TabBarViewController: UITabBarController {
     
     let weatherViewColtrollew = WeatherBuilder.build()
-    let newsViewController = NewsViewController()
     let mapViewController = MapViewController()
     let degreesLabel = UILabel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.setViewControllers([weatherViewColtrollew,newsViewController,mapViewController], animated: true)
+        self.setViewControllers([weatherViewColtrollew,mapViewController], animated: true)
         view.addSubviews([degreesLabel])
         
         setupStyle()
@@ -40,13 +39,12 @@ class TabBarViewController: UITabBarController {
     
     func styleTabBar(){
         weatherViewColtrollew.title = "Weather"
-        newsViewController.title = "News"
         mapViewController.title = "Map"
         
         guard let items = self.tabBar.items else {return}
-        let images = ["cloud.sun.fill", "newspaper", "map"]
+        let images = ["cloud.sun.fill", "map"]
         
-        for i in 0...2{
+        for i in 0...1{
             items[i].image = UIImage(systemName: images[i])
         }
         

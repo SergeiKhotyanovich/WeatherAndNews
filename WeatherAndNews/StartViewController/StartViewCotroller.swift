@@ -45,7 +45,7 @@ class StartViewCotroller: UIViewController, startViewCotrollerProtocol {
         buttonNewsLayuot()
     }
 
-    func buttonWeatherLayout(){
+    func buttonWeatherLayout() {
         buttonWeather.translatesAutoresizingMaskIntoConstraints = false
         
         view.addConstraints([
