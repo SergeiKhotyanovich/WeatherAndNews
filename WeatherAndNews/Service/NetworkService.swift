@@ -23,7 +23,6 @@ class NetworkService:NSObject, NetworkServiceProtokol {
             do {
                 let obj = try JSONDecoder().decode(WeatherCurrentModel.self, from: data!)
                 completion(.success(obj))
-                print(obj)
             } catch{
                 completion(.failure(error))
             }

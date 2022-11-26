@@ -4,12 +4,13 @@ import UIKit
 import CoreLocation
 
 protocol weatherPresenterProtocol: NSObject{
-    init(view:weatherViewControllerProtocol, networkService: NetworkServiceProtokol, locationManager: LocationManagerProtocol)
+    init(view:WeatherViewControllerProtocol, networkService: NetworkServiceProtokol, locationManager: LocationManagerProtocol)
     func updateWeatherButtonPressed()
     func getWeather(location: Location)
     func getWeatherForecast(location: Location)
     func getSearchCity(city: String)
     func getDayOfTheWeek()
+    func updateMapViewWeatherButtonPressed(location: Location)
     
     var weatherCurrentModel: WeatherCurrentModel? {get set}
     var weatherForecastModel: WeatherForecastModel? {get set}
@@ -33,11 +34,11 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
     var numberOfSections:[String] = []
     var numberOfRows:[String] = []
     
-    private weak var view: weatherViewControllerProtocol?
+    private weak var view: WeatherViewControllerProtocol?
     private var networkService: NetworkServiceProtokol
     private var locationManager: LocationManagerProtocol
     
-    required init(view: weatherViewControllerProtocol, networkService: NetworkServiceProtokol, locationManager: LocationManagerProtocol) {
+    required init(view: WeatherViewControllerProtocol, networkService: NetworkServiceProtokol, locationManager: LocationManagerProtocol) {
         self.networkService = networkService
         self.locationManager = locationManager
         super.init()
@@ -46,13 +47,19 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
     
     func updateWeatherButtonPressed() {
         locationManager.updateLocation()
-        locationManager.location = { [weak self] result in
+        LocationManager.location = { [weak self] result in
             self?.getWeather(location: result)
             self?.getWeatherForecast(location: result)
         }
     }
     
-    func updateWeatherButtonUpdatePressed() {
+    func updateMapViewWeatherButtonPressed(location: Location) {
+        getWeather(location: location)
+        getWeatherForecast(location: location)
+        
+    }
+    
+    func updateSearchWeatherButtonPressed() {
         guard let searсhСityModel = searсhСityModel else {
             return
         }
@@ -61,7 +68,6 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
         
         getWeather(location: location)
         getWeatherForecast(location: location)
-        
     }
     
     func getWeather(location: Location) {
@@ -109,7 +115,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
                         self.view?.showAlert()
                     }else{
                         self.searсhСityModel = city
-                        self.updateWeatherButtonUpdatePressed()
+                        self.updateSearchWeatherButtonPressed()
                     }
 
 

@@ -2,7 +2,7 @@
 import Foundation
 
 final class WeatherBuilder {
-    static func build() -> WeatherViewController{
+    static func build() -> WeatherViewController {
         let view = WeatherViewController()
         let networkService = NetworkService()
         let locationManager = LocationManager()
@@ -12,7 +12,7 @@ final class WeatherBuilder {
         view.presenter = presenter
         return view
     }
-      
+    
     
     
     
