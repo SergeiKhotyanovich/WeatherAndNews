@@ -8,7 +8,7 @@ protocol WeatherViewControllerProtocol: AnyObject {
     func failure(error: Error)
     func successForecasView()
     func successSectionCount(numberOfSections:[String], numberOfRows:[String])
-    func successGettingData(currentWeatherViewModel: CurrentWeatherCollectionViewModel, forecastWeatherViewModel: ForecastWeatherViewModel)
+    func successGettingData(currentWeatherViewModel: CurrentWeatherViewModel, forecastWeatherViewModel: ForecastWeatherViewModel)
     func showAlert()
 }
 
@@ -259,17 +259,17 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         }
     }
     
-    func successGettingData(currentWeatherViewModel: CurrentWeatherCollectionViewModel, forecastWeatherViewModel: ForecastWeatherViewModel) {
+    func successGettingData(currentWeatherViewModel: CurrentWeatherViewModel, forecastWeatherViewModel: ForecastWeatherViewModel) {
         currentView.updateView(model: currentWeatherViewModel)
         forecastView.updateView(model: forecastWeatherViewModel)
+        searchView.popularCitiesCollectionView.reloadData()
         hideLoadViewIndicator()
     }
     
     func showAlert() {
         let alertController = UIAlertController(title: "Error", message: "This city doesn't exist", preferredStyle: .alert)
         let alertAction = UIAlertAction(title: "Cancel", style: .cancel) {_ in
-            self.hideLoadViewIndicator()
-            self.animateIsHidenSearchView()
+            self.loadViewIndicator.stopAnimating()
         }
         alertController.addAction(alertAction)
         present(alertController, animated: true)

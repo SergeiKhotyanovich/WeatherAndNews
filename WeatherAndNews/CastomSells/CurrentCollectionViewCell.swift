@@ -60,8 +60,10 @@ class CurrentCollectionViewCell: UICollectionViewCell {
             make.top.equalTo(imageView.snp.bottom)
             make.left.right.bottom.equalToSuperview()
         }
-        
-  
-
+    }
+    
+    func updateCellWith(model: CurrentWeatherCollectionVievModel) {
+        imageView.image = model.image
+        label.text = model.description
     }
 }

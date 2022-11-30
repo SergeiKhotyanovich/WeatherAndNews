@@ -3,7 +3,7 @@ import UIKit
 import CoreLocation
 
 protocol LocationManagerProtocol: NSObject {
-    static var location: ((Location)->Void)? { get set }
+    var location: ((Location)->Void)? { get set }
 
     func updateLocation()
 }
@@ -12,7 +12,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate, LocationManagerProto
 
     let locationManager = CLLocationManager()
     
-    static var location: ((Location)->Void)?
+    var location: ((Location)->Void)?
     
     func updateLocation() {
         locationManager.requestWhenInUseAuthorization()
@@ -32,7 +32,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate, LocationManagerProto
             let langitude = String(format:"%f", lastLocatin.coordinate.longitude)
             print(latitude,langitude)
             
-            LocationManager.location?(Location(longitude: langitude, lotitude: latitude))
+            location?(Location(longitude: langitude, lotitude: latitude))
             locationManager.stopUpdatingLocation()
             
             

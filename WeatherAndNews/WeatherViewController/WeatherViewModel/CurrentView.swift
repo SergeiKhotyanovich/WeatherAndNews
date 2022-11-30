@@ -17,7 +17,7 @@ class CurrentView: UIView {
     private let weatherDescriptionLabel = UILabel()
     private let bigScreenWidth = 570
 
-    private var collectionViewModels: CurrentWeatherCollectionViewModel?
+    private var viewModels: [CurrentWeatherCollectionVievModel]?
     
     private let currentCollectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())
@@ -148,7 +148,7 @@ class CurrentView: UIView {
         weatherPicture.tintColor = Color.secondary
     }
 
-    func updateView(model: CurrentWeatherCollectionViewModel) {
+    func updateView(model: CurrentWeatherViewModel) {
         
         UIView.animate(withDuration: 2, delay: 0) {
             self.weatherPicture.image = model.weatherPicture
@@ -157,7 +157,7 @@ class CurrentView: UIView {
             self.tempLabel.text = model.tempLabel
             self.currentCollectionView.reloadData()
         }
-        collectionViewModels = model
+        viewModels = model.currentWeatherCollectionVievModel
     }
 }
 
@@ -166,64 +166,19 @@ class CurrentView: UIView {
 extension CurrentView: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 9
+        guard let model = viewModels else { return 0 }
+
+        return  model.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CurrentCollectionViewCell.identifier, for: indexPath) as! CurrentCollectionViewCell
         
-        let model = collectionViewModels
+        guard
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CurrentCollectionViewCell.identifier, for: indexPath) as? CurrentCollectionViewCell,
+            let collectionViewModel = viewModels else { return UICollectionViewCell() }
         
-        switch indexPath.row{
-        case 0:
-            if let pressure = model?.currentWeatherCollectionModel.pressure.descriptions{
-                cell.label.text = pressure
-            }
-            cell.imageView.image = model?.currentWeatherCollectionModel.pressure.image
-        case 3:
-            if let humidity = model?.currentWeatherCollectionModel.humidity.descriptions{
-                cell.label.text = humidity
-            }
-            
-            cell.imageView.image = model?.currentWeatherCollectionModel.humidity.image
-        case 6:
-            if let windSpeed = model?.currentWeatherCollectionModel.windSpeed.descriptions{
-                cell.label.text = windSpeed
-            }
-            cell.imageView.image = model?.currentWeatherCollectionModel.windSpeed.image
-        case 1:
-            if let visibility = model?.currentWeatherCollectionModel.visibility.descriptions{
-                cell.label.text = visibility
-            }
-            cell.imageView.image = model?.currentWeatherCollectionModel.visibility.image
-        case 4:
-            if let clouds = model?.currentWeatherCollectionModel.сloudiness.descriptions{
-                cell.label.text = clouds
-            }
-            cell.imageView.image = model?.currentWeatherCollectionModel.сloudiness.image
-        case 7:
-            if let feelsLike = model?.currentWeatherCollectionModel.feelsLike.descriptions{
-                cell.label.text = feelsLike
-            }
-            cell.imageView.image = model?.currentWeatherCollectionModel.feelsLike.image
-        case 2:
-            if let rainfall = model?.currentWeatherCollectionModel.rainfall.descriptions{
-                cell.label.text = rainfall
-            }
-            cell.imageView.image = model?.currentWeatherCollectionModel.rainfall.image
-        case 5:
-            if let tempMax = model?.currentWeatherCollectionModel.tempMax.descriptions{
-                cell.label.text = tempMax
-            }
-            cell.imageView.image = model?.currentWeatherCollectionModel.tempMax.image
-        case 8:
-            if let tempMin = model?.currentWeatherCollectionModel.tempMin.descriptions{
-                cell.label.text = tempMin
-            }
-            cell.imageView.image = model?.currentWeatherCollectionModel.tempMin.image
-        default:
-            cell.label.text = model?.cityLabel
-        }
+        cell.updateCellWith(model: collectionViewModel[indexPath.row])
+         
         return cell
     }
     
