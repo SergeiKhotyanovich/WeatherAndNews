@@ -7,6 +7,6 @@ target 'WeatherAndNews' do
 
   # Pods for WeatherAndNews
 pod 'SnapKit', '~> 5.0.0'
-pod 'YandexMapsMobile', '4.2.2-full'
+pod 'SwiftLint'
 
 end

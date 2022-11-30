@@ -15,7 +15,7 @@ protocol weatherPresenterProtocol: NSObject{
     var weatherCurrentModel: WeatherCurrentModel? {get set}
     var weatherForecastModel: WeatherForecastModel? {get set}
     var searсhСityModel: LocationCityModel?{get set}
-    var currentWeatherViewModel: CurrentWeatherCollectionViewModel?{ get set }
+    var currentWeatherViewModel: CurrentWeatherViewModel?{ get set }
     var forecastWeatherView: ForecastWeatherViewModel? { get set }
     var numberOfSections:[String]{get set}
     var numberOfRows:[String]{get set}
@@ -26,7 +26,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
     var weatherCurrentModel: WeatherCurrentModel?
     var weatherForecastModel: WeatherForecastModel?
     var forecastWeatherView: ForecastWeatherViewModel?
-    var currentWeatherViewModel: CurrentWeatherCollectionViewModel?
+    var currentWeatherViewModel: CurrentWeatherViewModel?
     var searсhСityModel: LocationCityModel?
     
     let dateFormatter = DateFormatter()
@@ -47,7 +47,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
     
     func updateWeatherButtonPressed() {
         locationManager.updateLocation()
-        LocationManager.location = { [weak self] result in
+        locationManager.location = { [weak self] result in
             self?.getWeather(location: result)
             self?.getWeatherForecast(location: result)
         }
@@ -105,7 +105,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
     
     func getSearchCity(city: String) {
         networkService.getSearchCity(city: city, completion:  { [weak self] result in
-
+            
             guard let self = self else {return}
             DispatchQueue.main.async {
                 switch result {
@@ -116,14 +116,22 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
                     }else{
                         self.searсhСityModel = city
                         self.updateSearchWeatherButtonPressed()
+                        self.addOnlyUniqueSities()
                     }
-
-
                 case .failure(let error):
                     self.view?.failure(error: error)
                 }
             }
         })
+    }
+    
+    func addOnlyUniqueSities() {
+        
+        guard let city = searсhСityModel else { return }
+        if !PreservationOfPopularCities.shared.popularCities.contains(city.first!.name) {
+            
+            PreservationOfPopularCities.shared.popularCities.insert(city.first!.name, at: 0)
+        }
     }
     
     private func prepareForecastWeatherViewModel(data: WeatherForecastModel) -> ForecastWeatherViewModel {
@@ -184,25 +192,63 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
         }
     }
     
-    func prepereCurrentWeatherViewModel(data: WeatherCurrentModel) -> CurrentWeatherCollectionViewModel {
-        let model = CurrentWeatherCollectionViewModel(
+    func prepereCurrentWeatherViewModel(data: WeatherCurrentModel) -> CurrentWeatherViewModel {
+        let currentWeatherCollectionViewModel = self.prepareCurrentWeatherCollectionVievModel(data: data)
+        let model = CurrentWeatherViewModel(
             weatherPicture: WeatherImages.getWeatherPic(name: (data.weather[0].icon))!,
             cityLabel: data.name,
             weatherLabel: DataSource.weatherIDs[data.weather[0].id]!,
             tempLabel: "\(Int(data.main.temp))°",
-            currentWeatherCollectionModel: CurrentWeatherCollectionModel(
-                pressure: Pressure(descriptions: "\(data.main.pressure)hPa"),
-                humidity: Humidity(descriptions: "\(data.main.humidity)%"),
-                windSpeed: WindSpeed(descriptions: "\(Int(data.wind.speed))m/s"),
-                visibility: Visibility(descriptions: "\(data.visibility)M"),
-                сloudiness: Сloudiness(descriptions: "\(data.clouds.all)%"),
-                feelsLike: FeelsLike(descriptions: "\(Int(data.main.feelsLike))°C"),
-                rainfall: Rainfall(descriptions: "\(data.clouds.all)%"),
-                tempMax: TempMax(descriptions: "\(Int(data.main.tempMax))°C"),
-                tempMin: TempMin(descriptions: "\(Int(data.main.tempMin))°C")))
+            currentWeatherCollectionVievModel: currentWeatherCollectionViewModel[0])
         
         return model
     }
+    
+    func prepareCurrentWeatherCollectionVievModel(data: WeatherCurrentModel) -> [[CurrentWeatherCollectionVievModel]] {
+        let parameters = [
+            WeatherParameters.pressure,
+            WeatherParameters.humidity,
+            WeatherParameters.windSpeed,
+            WeatherParameters.visibility,
+            WeatherParameters.сloudiness,
+            WeatherParameters.feelsLike,
+            WeatherParameters.rainfall,
+            WeatherParameters.tempMax,
+            WeatherParameters.tempMin
+        ]
+        var outModels = [[CurrentWeatherCollectionVievModel]]()
+        var models = [CurrentWeatherCollectionVievModel]()
+        
+        for parameter in parameters {
+            var model: CurrentWeatherCollectionVievModel
+            switch parameter {
+            case .pressure:
+                model = CurrentWeatherCollectionVievModel(description: "\(data.main.pressure)hPa", image: WeatherImages.pressure!)
+            case .humidity:
+                model = CurrentWeatherCollectionVievModel(description: "\(data.main.humidity)%", image: WeatherImages.humidity!)
+            case .windSpeed:
+                model = CurrentWeatherCollectionVievModel(description: "\(Int(data.wind.speed))m/s", image: WeatherImages.windSpeed!)
+            case .visibility:
+                model = CurrentWeatherCollectionVievModel(description: "\(data.visibility)M", image: WeatherImages.visibility!)
+            case .сloudiness:
+                model = CurrentWeatherCollectionVievModel(description: "\(data.clouds.all)%", image: WeatherImages.сloudiness!)
+            case .feelsLike:
+                model = CurrentWeatherCollectionVievModel(description: "\(Int(data.main.feelsLike))°C", image: WeatherImages.feelsLike!)
+            case .rainfall:
+                model = CurrentWeatherCollectionVievModel(description: "\(data.clouds.all)%", image: WeatherImages.rainfall!)
+            case .tempMax:
+                model = CurrentWeatherCollectionVievModel(description: "\(Int(data.main.tempMax))°C", image: WeatherImages.tempMax!)
+            case .tempMin:
+                model = CurrentWeatherCollectionVievModel(description: "\(Int(data.main.tempMin))°C", image: WeatherImages.tempMin!)
+            }
+            models.append(model)
+        }
+        outModels.append(models)
+        return outModels
+    }
+    
+    
+    
     
     private func updateCurrentView(dataCurrent: WeatherCurrentModel, dataForecast: WeatherForecastModel) {
         DispatchQueue.main.async {

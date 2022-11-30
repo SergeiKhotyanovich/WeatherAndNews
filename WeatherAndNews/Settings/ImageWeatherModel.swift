@@ -3,6 +3,17 @@ import Foundation
 import UIKit
 
 enum WeatherImages {
+    
+    static let pressure = UIImage(systemName: "thermometer")
+    static let humidity = UIImage(systemName: "humidity")
+    static let windSpeed = UIImage(systemName: "wind")
+    static let visibility = UIImage(systemName: "eye.fill")
+    static let сloudiness = UIImage(systemName: "smoke.fill")
+    static let feelsLike = UIImage(systemName: "figure.stand")
+    static let rainfall = UIImage(systemName: "cloud.heavyrain")
+    static let tempMax = UIImage(systemName: "sun.max.fill")
+    static let tempMin = UIImage(systemName: "sun.min")
+
 
     static private let condition = [
         (image: UIImage.systemNamed("sun.max.fill"), name: "01n"),
@@ -36,3 +47,6 @@ enum WeatherImages {
     }
  }
 
+enum WeatherParameters {
+    case pressure, humidity, windSpeed, visibility, сloudiness, feelsLike, rainfall, tempMax, tempMin
+}

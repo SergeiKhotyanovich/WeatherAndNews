@@ -13,13 +13,8 @@ class SearchView: UIView {
     
     var updateSearchButton = UIButton(type: .system)
     var searchTextField = UITextField()
-    let popularCitiesModel = [
-        "Moscow", "Delhi", "Pattaya", "Beijing",
-        "Toronto", "Jerusalem", "London", "Honolulu",
-        "Sydney"
-    ]
     
-    private let popularCitiesCollectionView: UICollectionView = {
+    let popularCitiesCollectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())
         view.showsHorizontalScrollIndicator = false
         view.showsVerticalScrollIndicator = false
@@ -117,19 +112,19 @@ class SearchView: UIView {
 
 extension SearchView: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return popularCitiesModel.count
+        return PreservationOfPopularCities.shared.popularCities.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = popularCitiesCollectionView.dequeueReusableCell(withReuseIdentifier: SearchCollectionViewCell.identifier, for: indexPath) as! SearchCollectionViewCell
         
-        cell.label.text = popularCitiesModel[indexPath.row]
-        
+        cell.label.text = PreservationOfPopularCities.shared.popularCities[indexPath.row]
         return cell
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        searchTextField.text = popularCitiesModel[indexPath.row]
+        searchTextField.text = PreservationOfPopularCities.shared.popularCities[indexPath.row]
     }
     
 
