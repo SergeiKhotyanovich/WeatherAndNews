@@ -14,16 +14,16 @@ protocol WeatherViewControllerProtocol: AnyObject {
 
 class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     
-    public var presenter: weatherPresenterProtocol!
+    var presenter: weatherPresenterProtocol!
     private var forecastViewModel: ForecastWeatherViewModel?
     
-    let titleNameLabel = UILabel()
-    let searchButoon = UIButton(type: .system)
-    let updateLocationButton = UIButton()
-    var currentView = CurrentView(frame: .zero)
-    var forecastView = ForecastView(frame: .zero)
-    var searchView = SearchView(frame: .zero)
-    let notificationCenter = NotificationCenter.default
+    private let titleNameLabel = UILabel()
+    private let searchButoon = UIButton(type: .system)
+    private let updateLocationButton = UIButton()
+    private var currentView = CurrentView(frame: .zero)
+    private var forecastView = ForecastView(frame: .zero)
+    private var searchView = SearchView(frame: .zero)
+    private let notificationCenter = NotificationCenter.default
     
     private let blurView: UIVisualEffectView = {
         let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.dark)
@@ -32,7 +32,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         return blurEffectView
     }()
     
-    lazy var pageControll:UISegmentedControl = {
+    private lazy var pageControll:UISegmentedControl = {
         let items = ["Current", "Forecast"]
         let view = UISegmentedControl(items: items)
         view.selectedSegmentIndex = 0
@@ -41,7 +41,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         return view
     }()
     
-    var loadViewIndicator: UIActivityIndicatorView = {
+    private var loadViewIndicator: UIActivityIndicatorView = {
         var spiner = UIActivityIndicatorView(style: .large)
         spiner.color = Color.secondary
         spiner.hidesWhenStopped = true
@@ -51,37 +51,51 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupUI()
+        setupLayout()
+        setupStyle()
+        setupTarget()
+    }
+    
+    func setupUI() {
         view.addSubviews([
             titleNameLabel,searchButoon,
             updateLocationButton,searchView,
             pageControll, currentView,
             forecastView, blurView, loadViewIndicator
         ])
-        
-        setupLayout()
-        setupStyle()
-        
         searchView.backgroundColor = Color.main
-        
         view.backgroundColor = UIColor(named: "main")
-        
-        updateLocationButton.addTarget(self, action: #selector(updateWeatherButtonPressed), for: .touchUpInside)
-        pageControll.addTarget(self, action: #selector(changeScreenWeather), for: .allEvents)
-        searchButoon.addTarget(self, action: #selector(animateHidenSearchView), for: .touchUpInside)
-        
-        let tap = UITapGestureRecognizer(target: self, action: #selector(animateIsHidenSearchView))
-        blurView.addGestureRecognizer(tap)
-        
-        searchView.updateSearchButton.addTarget(self, action: #selector(searchUpdateButtonPress), for: .touchUpInside)
         
         forecastView.isHidden = true
         searchView.alpha = 0
         blurView.alpha = 0
-        
         loadViewIndicator.center = view.center
+    }
+    
+    func setupTarget() {
+        updateLocationButton.addTarget(self,
+                                       action: #selector(updateWeatherButtonPressed),
+                                       for: .touchUpInside)
+        pageControll.addTarget(self,
+                               action: #selector(changeScreenWeather),
+                               for: .allEvents)
+        searchButoon.addTarget(self,
+                               action: #selector(animateHidenSearchView),
+                               for: .touchUpInside)
         
-        notificationCenter.addObserver(self, selector: #selector(mapViewWeatherLocation) , name: NSNotification.Name.mapViewWeatherLocation, object: nil)
+        let tap = UITapGestureRecognizer(target: self,
+                                         action: #selector(animateIsHidenSearchView))
+        blurView.addGestureRecognizer(tap)
         
+        searchView.updateSearchButton.addTarget(self,
+                                                action: #selector(searchUpdateButtonPress),
+                                                for: .touchUpInside)
+        
+        notificationCenter.addObserver(self,
+                                       selector: #selector(mapViewWeatherLocation) ,
+                                       name: NSNotification.Name.mapViewWeatherLocation,
+                                       object: nil)
     }
     
     //MARK: STYLE
@@ -173,7 +187,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             make.left.right.equalToSuperview()
         }
-                
+        
         searchView.snp.makeConstraints { make in
             make.top.equalToSuperview()
             make.right.left.equalToSuperview()
@@ -184,9 +198,9 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
             make.top.equalTo(pageControll).inset(35)
             make.right.left.bottom.equalToSuperview()
         }
-//       spiner.snp.makeConstraints { make in
-//          make.top.right.left.bottom.equalToSuperview()
-//        }
+        //       spiner.snp.makeConstraints { make in
+        //          make.top.right.left.bottom.equalToSuperview()
+        //        }
     }
     
     //MARK: FUNC
@@ -211,7 +225,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     
     
     @objc func setAnotherView() {
-//        self.presenter.showFitstView()
+        //        self.presenter.showFitstView()
     }
     
     func success() {

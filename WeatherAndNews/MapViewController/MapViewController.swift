@@ -17,14 +17,12 @@ class MapViewController: UIViewController, MapViewControllerProtocoll {
     
     public var presenter: MapPresenterProtokol!
     
-    let mapView = MKMapView()
-    let locationManager = CLLocationManager()
-    var longitude = ""
-    var latitude = ""
+    private let mapView = MKMapView()
+    private let locationManager = CLLocationManager()
     var location: Location? = nil
-    let notificationCenter = NotificationCenter.default
+    private let notificationCenter = NotificationCenter.default
     
-    let showWeatherButton: UIButton = {
+    private let showWeatherButton: UIButton = {
         let showWeather = UIButton(type: .custom)
         showWeather.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 50, height: 20))
         showWeather.backgroundColor = Color.element
@@ -34,34 +32,42 @@ class MapViewController: UIViewController, MapViewControllerProtocoll {
         return showWeather
     }()
     
-    let centerView: UIView = {
+    private let centerView: UIView = {
         let centerView = UIView()
         centerView.backgroundColor = Color.secondary
         centerView.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 15, height: 15))
         centerView.layer.cornerRadius = 7
         return centerView
     }()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupUI()
+        setupLayout()
+        setupDelegat()
+    }
+    
+    func setupUI() {
         view.addSubviews([
             mapView,
             centerView,
             showWeatherButton
         ])
         
-        setupLayout()
         mapView.showsUserLocation = true
         mapView.showsScale = true
         mapView.showsCompass = true
-        mapView.delegate = self
         
         locationManager.requestWhenInUseAuthorization()
-        locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.startUpdatingLocation()
         showWeatherButton.addTarget(self, action: #selector(mapWeatherButtonPressed), for: .touchUpInside)
+    }
+    
+    func setupDelegat() {
+        mapView.delegate = self
+        locationManager.delegate = self
     }
     
     //MARK: LAYOUT
@@ -101,14 +107,12 @@ extension MapViewController: CLLocationManagerDelegate {
         mapView.setCenter(location.coordinate, animated: true)
     }
 }
- 
+
 extension MapViewController: MKMapViewDelegate {
     
     func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
-        latitude = String(mapView.centerCoordinate.latitude)
-        longitude = String(mapView.centerCoordinate.longitude)
         
-       location = Location(longitude: String(mapView.centerCoordinate.longitude), lotitude: String(mapView.centerCoordinate.latitude))
+        location = Location(longitude: String(mapView.centerCoordinate.longitude), lotitude: String(mapView.centerCoordinate.latitude))
         
     }
     

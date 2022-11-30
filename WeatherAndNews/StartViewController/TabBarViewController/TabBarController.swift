@@ -6,35 +6,33 @@ class TabBarViewController: UITabBarController {
     
     let weatherViewColtrollew = WeatherBuilder.build()
     let mapViewController = MapViewController()
-    let degreesLabel = UILabel()
-
+    private let degreesLabel = UILabel()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.setViewControllers([weatherViewColtrollew,mapViewController], animated: true)
-        view.addSubviews([degreesLabel])
-        
-        setupStyle()
-        view.backgroundColor = Color.main
+        setupUI()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        
-        
         navigationController?.isNavigationBarHidden = true
     }
     
-    //MARK: LAYOUT
-    
-
-    
     //MARK: STYLE
     
-    func setupStyle(){
+    func setupUI(){
+        self.setViewControllers([weatherViewColtrollew,
+                                 mapViewController
+                                ],
+                                animated: true)
+        view.addSubviews([
+            degreesLabel
+        ])
         
         styleTabBar()
+        view.backgroundColor = Color.main
     }
     
     func styleTabBar(){
