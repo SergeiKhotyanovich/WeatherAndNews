@@ -10,14 +10,15 @@ import UIKit
 
 class ForecastView: UIView {
     
-    var forecastTableView = UITableView(frame: .zero, style: .grouped)
-    var collectionViewModels: ForecastWeatherViewModel?
-    var numberOfSections: [String] = []
-    var numberOfRows: [String] = []
-    var indexPathRow = 0
+    private var forecastTableView = UITableView(frame: .zero, style: .grouped)
+    private var collectionViewModels: ForecastWeatherViewModel?
+    private var numberOfSections: [String] = []
+    private var numberOfRows: [String] = []
+    private var indexPathRow = 0
+    private let heightForRowAt = CGFloat(80)
     
-    private var backView = UIView()
-    var detailedWeatherView = UIView()
+    private var backgroundView = UIView()
+    private var detailedWeatherView = UIView()
     
     private let blurView: UIVisualEffectView = {
         let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.dark)
@@ -98,33 +99,9 @@ class ForecastView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        addSubviews([
-            forecastTableView,
-            backView
-        ])
-        
-        backView.addSubviews([
-            blurView,
-            detailedWeatherView,
-        ])
-        detailedWeatherView.addSubviews([
-            tempDetailedView, dayOfTheWeekLabel,
-            weatherDescriptionLabel, currentWeatherImageView,
-            timeLabel, detailedWeatherСollectionView
-        ])
-        
-        blurView.frame = bounds
+        setupUI()
+        setupCollectionsSetting()
         setupStyle()
-        forecastTableView.delegate = self
-        forecastTableView.dataSource = self
-        detailedWeatherСollectionView.delegate = self
-        detailedWeatherСollectionView.dataSource = self
-        
-        forecastTableView.showsVerticalScrollIndicator = false
-        backView.isHidden = true
-        
-        let tap = UITapGestureRecognizer(target: self, action: #selector(hideView))
-        blurView.addGestureRecognizer(tap)
     }
     
     required init?(coder: NSCoder) {
@@ -138,14 +115,45 @@ class ForecastView: UIView {
         setupCollectionViewLayout()
     }
     
-    //MARK: Setuping Layout
+    func setupUI() {
+        addSubviews([
+            forecastTableView,
+            backgroundView
+        ])
+        
+        backgroundView.addSubviews([
+            blurView,
+            detailedWeatherView,
+        ])
+        detailedWeatherView.addSubviews([
+            tempDetailedView, dayOfTheWeekLabel,
+            weatherDescriptionLabel, currentWeatherImageView,
+            timeLabel, detailedWeatherСollectionView
+        ])
+        
+        blurView.frame = bounds
+        forecastTableView.showsVerticalScrollIndicator = false
+        backgroundView.isHidden = true
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(hideView))
+        blurView.addGestureRecognizer(tap)
+    }
+    
+    func setupCollectionsSetting() {
+        forecastTableView.delegate = self
+        forecastTableView.dataSource = self
+        detailedWeatherСollectionView.delegate = self
+        detailedWeatherСollectionView.dataSource = self
+    }
+    
+    //MARK: SetupLayout
     
     func setupLayout() {
         forecastTableView.snp.makeConstraints { make in
             make.top.bottom.equalToSuperview()
             make.left.right.equalToSuperview().inset(15)
         }
-        backView.snp.makeConstraints { make in
+        backgroundView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
         
@@ -156,20 +164,21 @@ class ForecastView: UIView {
         }
         currentWeatherImageView.snp.makeConstraints { make in
             make.left.top.equalToSuperview().inset(8)
-            make.right.equalTo(backView.snp.centerX)
-            make.height.equalTo((backView.frame.width - 16) / 2)
+            make.right.equalTo(backgroundView.snp.centerX)
+            make.height.equalTo((backgroundView.frame.width - 16) / 2)
         }
         tempDetailedView.snp.makeConstraints { make in
-            make.left.equalTo(backView.snp.centerX)
+            make.left.equalTo(backgroundView.snp.centerX)
+            make.right.equalToSuperview().inset(16)
             make.top.right.equalToSuperview()
             make.bottom.equalTo(currentWeatherImageView.snp.bottom).inset(40)
         }
         
         weatherDescriptionLabel.snp.makeConstraints { make in
             make.top.equalTo(tempDetailedView.snp.bottom).inset(16)
-            make.left.equalTo(backView.snp.centerX).offset(16)
+            make.left.equalTo(backgroundView.snp.centerX).offset(16)
             make.bottom.equalTo(currentWeatherImageView.snp.bottom)
-            make.right.equalToSuperview().inset(8)
+            make.right.equalToSuperview().inset(16)
         }
         
         dayOfTheWeekLabel.snp.makeConstraints { make in
@@ -182,7 +191,7 @@ class ForecastView: UIView {
             make.top.equalTo(currentWeatherImageView.snp.bottom)
             make.left.equalTo(dayOfTheWeekLabel.snp.right)
             make.right.equalToSuperview().inset(8)
-           
+            
         }
         detailedWeatherСollectionView.snp.makeConstraints { make in
             make.top.equalTo(dayOfTheWeekLabel.snp.bottom).offset(8)
@@ -201,24 +210,23 @@ class ForecastView: UIView {
         detailedWeatherСollectionView.collectionViewLayout = layout
     }
     
-    //MARK: Setuping Style
+    //MARK: SetupStyle
     
     func setupStyle() {
-        tableViewStyle()
-        detailedWeatherViewStyle()
+        setupTableViewStyle()
+        setupDetailedWeatherViewStyle()
     }
     
-    func tableViewStyle() {
+    func setupTableViewStyle() {
         forecastTableView.backgroundColor = UIColor(named: "main")
     }
     
-    func detailedWeatherViewStyle() {
+    func setupDetailedWeatherViewStyle() {
         detailedWeatherView.layer.cornerRadius = 10
         detailedWeatherView.backgroundColor = Color.main
     }
     
-    
-    //MARK: Setuping Func
+    //MARK: SetupFunc
     
     func updateSectionCount(sectionsCount:[String], rowsCount: [String]) {
         numberOfSections = sectionsCount
@@ -245,12 +253,12 @@ class ForecastView: UIView {
             let transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
             self.detailedWeatherView.transform = transform
         } completion: { _ in
-            self.backView.isHidden = true
+            self.backgroundView.isHidden = true
         }
     }
     func showView(){
         detailedWeatherСollectionView.reloadData()
-        backView.isHidden = false
+        backgroundView.isHidden = false
         
         let transform = CGAffineTransform(scaleX: 0, y: 0)
         detailedWeatherView.transform = transform
@@ -332,7 +340,7 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
                 image: link.image,
                 description: link.description,
                 time: link.hour)
-
+            
         }else if indexPath.section == 3{
             let link = model.collectionViewForHourModels[indexPath.row + 16 + numberOfRows.count]
             cell.updateCell(
@@ -362,7 +370,7 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 80
+        return heightForRowAt
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -464,7 +472,7 @@ extension ForecastView: UICollectionViewDelegate, UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-
+        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailedWeatherCollectionViewCell.identifier, for: indexPath) as! DetailedWeatherCollectionViewCell
         
         switch indexPath.row {

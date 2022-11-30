@@ -17,8 +17,15 @@ class StartViewCotroller: UIViewController, startViewCotrollerProtocol {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
-        view.addSubviews([buttonWeather,buttonNews])
+        setupUI()
+    }
+    
+    //MARK: FUNC
+    
+    func setupUI() {
+        view.addSubviews([buttonWeather,
+                          buttonNews
+                         ])
         
         setupLayout()
         setupStyle()
@@ -26,8 +33,6 @@ class StartViewCotroller: UIViewController, startViewCotrollerProtocol {
         view.backgroundColor = Color.main
         buttonWeather.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
     }
-    
-    //MARK: FUNC
     
     func routeToNextVC() {
         let vc = TabBarViewController()

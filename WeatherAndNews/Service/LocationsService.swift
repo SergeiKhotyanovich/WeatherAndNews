@@ -4,12 +4,12 @@ import CoreLocation
 
 protocol LocationManagerProtocol: NSObject {
     var location: ((Location)->Void)? { get set }
-
+    
     func updateLocation()
 }
 
 class LocationManager: NSObject, CLLocationManagerDelegate, LocationManagerProtocol {
-
+    
     let locationManager = CLLocationManager()
     
     var location: ((Location)->Void)?
@@ -34,9 +34,6 @@ class LocationManager: NSObject, CLLocationManagerDelegate, LocationManagerProto
             
             location?(Location(longitude: langitude, lotitude: latitude))
             locationManager.stopUpdatingLocation()
-            
-            
-            
         }
     }
 }

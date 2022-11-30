@@ -3,14 +3,8 @@ import Foundation
 import UIKit
 import CoreLocation
 
-protocol weatherPresenterProtocol: NSObject{
+protocol weatherPresenterProtocol: NSObject {
     init(view:WeatherViewControllerProtocol, networkService: NetworkServiceProtokol, locationManager: LocationManagerProtocol)
-    func updateWeatherButtonPressed()
-    func getWeather(location: Location)
-    func getWeatherForecast(location: Location)
-    func getSearchCity(city: String)
-    func getDayOfTheWeek()
-    func updateMapViewWeatherButtonPressed(location: Location)
     
     var weatherCurrentModel: WeatherCurrentModel? {get set}
     var weatherForecastModel: WeatherForecastModel? {get set}
@@ -19,9 +13,16 @@ protocol weatherPresenterProtocol: NSObject{
     var forecastWeatherView: ForecastWeatherViewModel? { get set }
     var numberOfSections:[String]{get set}
     var numberOfRows:[String]{get set}
+    
+    func updateWeatherButtonPressed()
+    func getWeather(location: Location)
+    func getWeatherForecast(location: Location)
+    func getSearchCity(city: String)
+    func getDayOfTheWeek()
+    func updateMapViewWeatherButtonPressed(location: Location)
 }
 
-final class WeatherPresenter: NSObject, weatherPresenterProtocol{
+final class WeatherPresenter: NSObject, weatherPresenterProtocol {
     
     var weatherCurrentModel: WeatherCurrentModel?
     var weatherForecastModel: WeatherForecastModel?
@@ -126,8 +127,8 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
     }
     
     func addOnlyUniqueSities() {
-        
         guard let city = searсhСityModel else { return }
+        
         if !PreservationOfPopularCities.shared.popularCities.contains(city.first!.name) {
             
             PreservationOfPopularCities.shared.popularCities.insert(city.first!.name, at: 0)
@@ -246,10 +247,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol{
         outModels.append(models)
         return outModels
     }
-    
-    
-    
-    
+
     private func updateCurrentView(dataCurrent: WeatherCurrentModel, dataForecast: WeatherForecastModel) {
         DispatchQueue.main.async {
             let currentWeatherViewModel = self.prepereCurrentWeatherViewModel(data: dataCurrent)

@@ -16,7 +16,7 @@ class CurrentView: UIView {
     private let cityNameLabel = UILabel()
     private let weatherDescriptionLabel = UILabel()
     private let bigScreenWidth = 570
-
+    
     private var viewModels: [CurrentWeatherCollectionVievModel]?
     
     private let currentCollectionView: UICollectionView = {
@@ -30,11 +30,10 @@ class CurrentView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        addSubviews([tempLabel,weatherPicture,cityNameLabel,weatherDescriptionLabel,currentCollectionView])
+        setupUI()
+        setupCollectionsSetting()
         setupStyle()
-        currentCollectionView.delegate = self
-        currentCollectionView.dataSource = self
-        currentCollectionView.backgroundColor = .clear
+        
     }
     
     required init?(coder: NSCoder) {
@@ -48,13 +47,29 @@ class CurrentView: UIView {
         setupCollectionViewLayout()
     }
     
-    //MARK: Setuping Layout
+    func setupUI() {
+        addSubviews([tempLabel,weatherPicture,
+                     cityNameLabel,weatherDescriptionLabel,
+                     currentCollectionView
+                    ])
+        
+        currentCollectionView.backgroundColor = .clear
+    }
+    
+    func setupCollectionsSetting() {
+        currentCollectionView.delegate = self
+        currentCollectionView.dataSource = self
+    }
+    
+    //MARK: SetupLayout
     
     func setupLayout() {
         
         tempLabel.snp.makeConstraints { make in
             make.width.height.equalTo(self.frame.width/2)
-            make.top.left.equalToSuperview()
+            make.top.equalToSuperview()
+            make.left.equalToSuperview().inset(16)
+            make.right.equalTo(weatherPicture.snp.left)
         }
         
         weatherPicture.snp.makeConstraints { make in
@@ -106,7 +121,7 @@ class CurrentView: UIView {
         currentCollectionView.collectionViewLayout = layout
     }
     
-    //MARK: Setuping Style
+    //MARK: SetupStyle
     
     func setupStyle() {
         tempLabelStyle()
@@ -125,7 +140,6 @@ class CurrentView: UIView {
     }
     
     func cityLabelStyle() {
-        cityNameLabel.text = "Minsk"
         cityNameLabel.textAlignment = .center
         cityNameLabel.textColor = Color.secondary
         cityNameLabel.font = UIFont(name: "ChalkboardSE-Regular", size: 40)
@@ -135,7 +149,6 @@ class CurrentView: UIView {
     }
     
     func weatherLabelStyle() {
-        weatherDescriptionLabel.text = "Sunny"
         weatherDescriptionLabel.textAlignment = .center
         weatherDescriptionLabel.textColor = Color.secondary
         weatherDescriptionLabel.font = UIFont(name: "ChalkboardSE-Regular", size: 40)
@@ -146,28 +159,27 @@ class CurrentView: UIView {
     
     func weatherPictureStyle() {
         weatherPicture.tintColor = Color.secondary
+        weatherPicture.contentMode = .scaleAspectFit
     }
-
+    
     func updateView(model: CurrentWeatherViewModel) {
+        self.weatherPicture.image = model.weatherPicture
+        self.cityNameLabel.text = model.cityLabel
+        self.weatherDescriptionLabel.text = model.weatherLabel
+        self.tempLabel.text = model.tempLabel
+        self.currentCollectionView.reloadData()
         
-        UIView.animate(withDuration: 2, delay: 0) {
-            self.weatherPicture.image = model.weatherPicture
-            self.cityNameLabel.text = model.cityLabel
-            self.weatherDescriptionLabel.text = model.weatherLabel
-            self.tempLabel.text = model.tempLabel
-            self.currentCollectionView.reloadData()
-        }
         viewModels = model.currentWeatherCollectionVievModel
     }
 }
 
-//MARK: extension currentView
+//MARK: extension CurrentView
 
 extension CurrentView: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard let model = viewModels else { return 0 }
-
+        
         return  model.count
     }
     
@@ -178,7 +190,7 @@ extension CurrentView: UICollectionViewDelegate, UICollectionViewDataSource, UIC
             let collectionViewModel = viewModels else { return UICollectionViewCell() }
         
         cell.updateCellWith(model: collectionViewModel[indexPath.row])
-         
+        
         return cell
     }
     

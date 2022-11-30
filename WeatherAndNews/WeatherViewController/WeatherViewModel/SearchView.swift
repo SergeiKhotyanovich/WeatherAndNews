@@ -25,16 +25,9 @@ class SearchView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        addSubviews([
-            searchTextField,updateSearchButton, popularCitiesCollectionView
-        ])
-        
+        setupUI()
         setupStyle()
-        
-        popularCitiesCollectionView.delegate = self
-        popularCitiesCollectionView.dataSource = self
-        popularCitiesCollectionView.backgroundColor = .clear
-        
+        setupCollectionsSetting()
     }
     
     required init?(coder: NSCoder) {
@@ -45,6 +38,20 @@ class SearchView: UIView {
         super.layoutSubviews()
         setupLayout()
         setupCollectionViewLayout()
+    }
+    
+    func setupUI() {
+        addSubviews([
+            searchTextField,
+            updateSearchButton,
+            popularCitiesCollectionView
+        ])
+        popularCitiesCollectionView.backgroundColor = .clear
+    }
+    
+    func setupCollectionsSetting() {
+        popularCitiesCollectionView.delegate = self
+        popularCitiesCollectionView.dataSource = self
     }
     
     //MARK: LAYOUT
@@ -70,12 +77,12 @@ class SearchView: UIView {
     
     private func setupCollectionViewLayout() {
         let layout = UICollectionViewFlowLayout()
-
-            layout.scrollDirection = .horizontal
-            layout.itemSize = CGSize(
-                width: 100,
-                height: 70
-            )
+        
+        layout.scrollDirection = .horizontal
+        layout.itemSize = CGSize(
+            width: 100,
+            height: 70
+        )
         layout.minimumLineSpacing = 3
         popularCitiesCollectionView.collectionViewLayout = layout
     }
@@ -127,7 +134,7 @@ extension SearchView: UICollectionViewDelegate, UICollectionViewDataSource, UICo
         searchTextField.text = PreservationOfPopularCities.shared.popularCities[indexPath.row]
     }
     
-
+    
     
 }
 
