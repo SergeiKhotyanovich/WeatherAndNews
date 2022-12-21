@@ -14,11 +14,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        let viewController = StartBuilder.build()
-        _ = UINavigationController(rootViewController: viewController)
+        let LoadingVC = LoadingBuilder.build()
+        let TabBarVC = TabBarViewController()
+        let navigatorLoadingVC = UINavigationController(rootViewController: LoadingVC)
+        _ = UINavigationController(rootViewController: TabBarVC)
         
         window = UIWindow(frame: UIScreen.main.bounds)
-        window?.rootViewController = TabBarViewController()
+        window?.rootViewController = navigatorLoadingVC
         window?.makeKeyAndVisible()
         
         return true

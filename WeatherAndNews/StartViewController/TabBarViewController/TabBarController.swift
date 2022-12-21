@@ -2,10 +2,15 @@
 import UIKit
 import SnapKit
 
-class TabBarViewController: UITabBarController {
+protocol TabBarViewControllerProtocol: AnyObject {
+}
+
+class TabBarViewController: UITabBarController, TabBarViewControllerProtocol {
+    var presenter: TabBarPresenterProtocol!
     
     let weatherViewColtrollew = WeatherBuilder.build()
     let mapViewController = MapViewController()
+    let notificationCenter = NotificationCenter.default
     private let degreesLabel = UILabel()
     
     override func viewDidLoad() {
@@ -16,7 +21,7 @@ class TabBarViewController: UITabBarController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+
         navigationController?.isNavigationBarHidden = true
     }
     
@@ -33,6 +38,16 @@ class TabBarViewController: UITabBarController {
         
         styleTabBar()
         view.backgroundColor = Color.main
+        
+        notificationCenter.addObserver(self,
+                                       selector: #selector(mapWeatherButtonPressed) ,
+                                       name: NSNotification.Name.mapViewWeatherLocation,
+                                       object: nil)
+    }
+    
+    @objc func mapWeatherButtonPressed() {
+        
+        self.selectedIndex = 0
     }
     
     func styleTabBar(){

@@ -6,6 +6,7 @@ protocol NetworkServiceProtokol: NSObject {
     func getWeather(location: Location, completion: @escaping (Result<WeatherCurrentModel?, Error>) -> Void )
     func getWeatherForecast(location: Location, completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void)
     func getSearchCity(city: String, completion: @escaping (Result<LocationCityModel?, Error>) -> Void)
+//    func getJSONData<T: Decodable>(location: Location, completion: @escaping (T?) -> Void)
 }
 
 class NetworkService:NSObject, NetworkServiceProtokol {
@@ -64,6 +65,25 @@ class NetworkService:NSObject, NetworkServiceProtokol {
             }
         }.resume()
     }
+    
+    
+//    func getJSONData<T: Decodable>(location: Location, completion: @escaping (T?) -> Void) {
+//        let urlString = "https://api.openweathermap.org/data/2.5/forecast?lat=55&lon=44&appid=fe0a8df10334d41e9f5615b5cbca266f&units=metric"
+//
+//        guard let url = URL(string: urlString) else {return}
+//        let urlRequest = URLRequest(url: url)
+//
+//        URLSession.shared.dataTask(with: urlRequest) { data, response, error in
+//            guard let data = data else { return }
+//            do {
+//                let obj = try JSONDecoder().decode(T.self, from: data)
+//                completion(obj)
+//            } catch{
+//
+//            }
+//
+//        }.resume()
+//    }
     
     
     

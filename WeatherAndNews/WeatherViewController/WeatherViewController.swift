@@ -7,7 +7,7 @@ protocol WeatherViewControllerProtocol: AnyObject {
     func success()
     func failure(error: Error)
     func successForecasView()
-    func successSectionCount(numberOfSections:[String], numberOfRows:[String])
+    func successSectionCount(numberOfSections:[String], numberOfRowsAt:[Int])
     func successGettingData(currentWeatherViewModel: CurrentWeatherViewModel, forecastWeatherViewModel: ForecastWeatherViewModel)
     func showAlert()
 }
@@ -218,6 +218,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     }
     
     @objc func mapViewWeatherLocation(notification: Notification) {
+        showLoadViewIndicator()
         guard let coordinate = notification.userInfo as? [String : Location] else { return }
         guard let location = coordinate["location"] else { return }
         presenter.updateMapViewWeatherButtonPressed(location: location)
@@ -240,8 +241,8 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         self.presenter.getDayOfTheWeek()
     }
     
-    func successSectionCount(numberOfSections:[String], numberOfRows:[String]) {
-        forecastView.updateSectionCount(sectionsCount: numberOfSections, rowsCount: numberOfRows)
+    func successSectionCount(numberOfSections:[String], numberOfRowsAt:[Int]) {
+        forecastView.updateSectionCount(sectionsCount: numberOfSections, rowsCount: numberOfRowsAt)
         animateIsHidenSearchView()
     }
     

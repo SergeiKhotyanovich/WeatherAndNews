@@ -66,8 +66,27 @@ class DetailedWeatherCollectionViewCell: UICollectionViewCell {
         }
     }
 
-//    func updateCellWith(model: ForecastForDayCollectionViewModel) {
-//        imageView.image = model.image
-//        label.text = model.description
-//    }
-}
+//    func updateCellWith(model: ForecastForHourCollectionViewModel, indexPath: Int) {
+//        switch indexPath {
+//        case 0:
+//            label.text = model[indexPathRow].humidity
+//            imageView.image = UIImage(systemName: "humidity")
+//        case 1:
+//            label.text = model[1][indexPathRow].windiness
+//            imageView.image = UIImage(systemName: "wind")
+//        case 2:
+//            label.text = model[2][indexPathRow].visibility
+//            imageView.image = UIImage(systemName: "eye.fill")
+//        case 3:
+//            label.text = model[3][indexPathRow].feelsLike
+//            imageView.image = UIImage(systemName: "figure.stand")
+//        case 4:
+//            label.text = model[4][indexPathRow].pressure
+//            imageView.image = UIImage(systemName: "figure.stand")
+//        default:
+//            label.text = "111"
+//            }
+//        }
+//            
+        }
+

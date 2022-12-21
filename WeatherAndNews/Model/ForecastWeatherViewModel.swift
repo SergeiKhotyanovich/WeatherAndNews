@@ -4,7 +4,7 @@ import UIKit
 
 struct ForecastWeatherViewModel {
     var days: [ForecastForDayModel]
-    var collectionViewForHourModels: [ForecastForHourCollectionViewModel]
+    var collectionViewForHourModels: [[ForecastForHourCollectionViewModel]]
 }
 
 
