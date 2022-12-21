@@ -20,23 +20,34 @@ class MapViewController: UIViewController, MapViewControllerProtocoll {
     private let mapView = MKMapView()
     private let locationManager = CLLocationManager()
     var location: Location? = nil
+    var locationCenter: CLLocation?
     private let notificationCenter = NotificationCenter.default
     
     private let showWeatherButton: UIButton = {
-        let showWeather = UIButton(type: .custom)
-        showWeather.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 50, height: 20))
-        showWeather.backgroundColor = Color.element
-        showWeather.setTitle("Show weather", for: .normal)
-        showWeather.setTitleColor(Color.secondary, for: .normal)
-        showWeather.layer.cornerRadius = 10
-        return showWeather
+        let showWeatherButton = UIButton(type: .custom)
+        showWeatherButton.backgroundColor = Color.element
+        showWeatherButton.setTitle("Show weather", for: .normal)
+        showWeatherButton.setTitleColor(Color.secondary, for: .normal)
+        showWeatherButton.titleLabel?.font = UIFont(name: "MarkerFelt-Wide", size: 18)
+        showWeatherButton.layer.cornerRadius = 10
+        return showWeatherButton
+    }()
+    
+    private let setCameraCenterView: UIButton = {
+        let showWeatherButton = UIButton(type: .custom)
+        showWeatherButton.backgroundColor = Color.element
+        showWeatherButton.contentMode = .scaleToFill
+        showWeatherButton.setImage(UIImage(systemName: "location"), for: .normal)
+        showWeatherButton.tintColor = Color.secondary
+        showWeatherButton.layer.cornerRadius = 21
+        return showWeatherButton
     }()
     
     private let centerView: UIView = {
         let centerView = UIView()
-        centerView.backgroundColor = Color.secondary
-        centerView.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 15, height: 15))
-        centerView.layer.cornerRadius = 7
+        centerView.backgroundColor = .red
+        centerView.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 10, height: 10))
+        centerView.layer.cornerRadius = 5
         return centerView
     }()
     
@@ -52,7 +63,8 @@ class MapViewController: UIViewController, MapViewControllerProtocoll {
         view.addSubviews([
             mapView,
             centerView,
-            showWeatherButton
+            showWeatherButton,
+            setCameraCenterView
         ])
         
         mapView.showsUserLocation = true
@@ -63,6 +75,7 @@ class MapViewController: UIViewController, MapViewControllerProtocoll {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.startUpdatingLocation()
         showWeatherButton.addTarget(self, action: #selector(mapWeatherButtonPressed), for: .touchUpInside)
+        setCameraCenterView.addTarget(self, action: #selector(setCameraCenterViewPressed), for: .touchUpInside)
     }
     
     func setupDelegat() {
@@ -81,30 +94,45 @@ class MapViewController: UIViewController, MapViewControllerProtocoll {
         
         showWeatherButton.snp.makeConstraints { make in
             make.bottom.equalToSuperview().inset(100)
-            make.right.equalToSuperview().inset(10)
+            make.right.equalToSuperview().inset(16)
+            make.width.equalTo(130)
+            make.height.equalTo(35)
+        }
+        
+        setCameraCenterView.snp.makeConstraints { make in
+            make.right.equalToSuperview().inset(16)
+            make.bottom.equalTo(showWeatherButton.snp.top).inset(-12)
+            make.width.equalTo(45)
+            make.height.equalTo(45)
         }
     }
     
     //MARK: STYLE
     
     func setupStyle() {
-        
+//        mapView.eleme
     }
     
     //MARK: FUNC
     
     @objc func mapWeatherButtonPressed() {
-        
         guard let location = location else { return }
         notificationCenter.post(name: NSNotification.Name.mapViewWeatherLocation, object: self, userInfo: ["location":location])
+    }
+    
+    @objc func setCameraCenterViewPressed() {
+        guard let location = locationCenter?.coordinate else {
+            return
+        }
+        mapView.setCenter(location, animated: true)
     }
 }
 
 extension MapViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.first else { return }
-        mapView.setCenter(location.coordinate, animated: true)
+        locationCenter = locations.first
+
     }
 }
 

@@ -98,11 +98,11 @@ class ForecastTableViewCell: UITableViewCell {
         }
     }
     
-    func updateCell(temperature: String, image: UIImage, description: String, time: String) {
-        labelTemp.text = temperature + "°C"
-        imageViewForecast.image = image
-        labelDescriptions.text = description
-        labelTime.text = time
+    func updateCell(model: ForecastForHourCollectionViewModel) {
+        labelTemp.text = model.temperature + "°C"
+        imageViewForecast.image = model.image
+        labelDescriptions.text = model.description
+        labelTime.text = model.hour
     }
 }
 

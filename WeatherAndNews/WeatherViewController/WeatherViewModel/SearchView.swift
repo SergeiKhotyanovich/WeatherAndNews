@@ -59,7 +59,7 @@ class SearchView: UIView {
     func setupLayout() {
         
         searchTextField.snp.makeConstraints { make in
-            make.top.bottom.equalToSuperview().inset(50)
+            make.top.bottom.equalToSuperview().inset(46)
             make.left.equalToSuperview().inset(60)
             make.right.equalToSuperview().inset(90)
         }

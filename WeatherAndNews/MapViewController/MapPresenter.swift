@@ -18,6 +18,5 @@ final class MapPresenter: NSObject, MapPresenterProtokol{
        super.init()
        self.view = view
     }
-    
-    // nsNATIFIcationscenter
+
 }

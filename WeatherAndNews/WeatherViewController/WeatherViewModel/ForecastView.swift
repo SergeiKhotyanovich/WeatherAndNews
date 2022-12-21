@@ -13,8 +13,9 @@ class ForecastView: UIView {
     private var forecastTableView = UITableView(frame: .zero, style: .grouped)
     private var collectionViewModels: ForecastWeatherViewModel?
     private var numberOfSections: [String] = []
-    private var numberOfRows: [String] = []
+    private var numberOfRows: [Int] = []
     private var indexPathRow = 0
+    private var indexPathSection = 0
     private let heightForRowAt = CGFloat(80)
     
     private var backgroundView = UIView()
@@ -228,7 +229,7 @@ class ForecastView: UIView {
     
     //MARK: SetupFunc
     
-    func updateSectionCount(sectionsCount:[String], rowsCount: [String]) {
+    func updateSectionCount(sectionsCount:[String], rowsCount: [Int]) {
         numberOfSections = sectionsCount
         numberOfRows = rowsCount
         
@@ -239,11 +240,12 @@ class ForecastView: UIView {
         forecastTableView.reloadData()
     }
     
-    func updateDetailedView(temperature: String, image: UIImage, description: String, time: String) {
-        tempDetailedView.text = temperature + "°C"
-        currentWeatherImageView.image = image
-        weatherDescriptionLabel.text = description
-        timeLabel.text = time
+    func updateDetailedView(forecastModel: ForecastForHourCollectionViewModel, dayModel: String) {
+        tempDetailedView.text = forecastModel.temperature + "°C"
+        currentWeatherImageView.image = forecastModel.image
+        weatherDescriptionLabel.text = forecastModel.description
+        timeLabel.text = forecastModel.hour
+        dayOfTheWeekLabel.text = dayModel
     }
     
     @objc private func hideView() {
@@ -283,17 +285,17 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
         
         switch section{
         case 0:
-            return numberOfRows.count
+            return numberOfRows[0]
         case 1:
-            return 8
+            return numberOfRows[1]
         case 2:
-            return 8
+            return numberOfRows[2]
         case 3:
-            return 8
+            return numberOfRows[3]
         case 4:
-            return 8
+            return numberOfRows[4]
         case 5:
-            return 8 - numberOfRows.count
+            return numberOfRows[5]
         default:
             return 8
         }
@@ -308,7 +310,7 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
         tableView.register(ForecastTableViewCell.self, forCellReuseIdentifier: ForecastTableViewCell.identifier)
         guard
             let cell = tableView.dequeueReusableCell(withIdentifier: ForecastTableViewCell.identifier, for: indexPath) as? ForecastTableViewCell,
-            let model = collectionViewModels else { return UITableViewCell() }
+            let model = collectionViewModels?.collectionViewForHourModels else { return UITableViewCell() }
         
         cell.backgroundColor = Color.element
         cell.layer.borderColor = Color.main?.cgColor
@@ -317,55 +319,23 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
         cell.clipsToBounds = true
         cell.selectionStyle = .none
         
-        if indexPath.section == 0{
-            let link = model.collectionViewForHourModels[indexPath.row]
-            cell.updateCell(
-                temperature: link.temperature,
-                image: link.image,
-                description: link.description,
-                time: link.hour)
-            
-        }else if indexPath.section == 1{
-            let link = model.collectionViewForHourModels[indexPath.row + numberOfRows.count]
-            cell.updateCell(
-                temperature: link.temperature,
-                image: link.image,
-                description: link.description,
-                time: link.hour)
-            
-        }else if indexPath.section == 2{
-            let link = model.collectionViewForHourModels[indexPath.row + 8 + numberOfRows.count]
-            cell.updateCell(
-                temperature: link.temperature,
-                image: link.image,
-                description: link.description,
-                time: link.hour)
-            
-        }else if indexPath.section == 3{
-            let link = model.collectionViewForHourModels[indexPath.row + 16 + numberOfRows.count]
-            cell.updateCell(
-                temperature: link.temperature,
-                image: link.image,
-                description: link.description,
-                time: link.hour)
-            
-        }else if indexPath.section == 4{
-            let link = model.collectionViewForHourModels[indexPath.row + 24 + numberOfRows.count]
-            cell.updateCell(
-                temperature: link.temperature,
-                image: link.image,
-                description: link.description,
-                time: link.hour)
-            
-        }else if indexPath.section == 5{
-            let link = model.collectionViewForHourModels[indexPath.row + 32 + numberOfRows.count]
-            cell.updateCell(
-                temperature: link.temperature,
-                image: link.image,
-                description: link.description,
-                time: link.hour)
-        }
+        switch indexPath.section {
+        case 0:
+            cell.updateCell(model: model[0][indexPath.row])
+        case 1:
+            cell.updateCell(model: model[1][indexPath.row])
+        case 2:
+            cell.updateCell(model: model[2][indexPath.row])
+        case 3:
+            cell.updateCell(model: model[3][indexPath.row])
+        case 4:
+            cell.updateCell(model: model[4][indexPath.row])
+        case 5:
+            cell.updateCell(model: model[5][indexPath.row])
         
+        default:
+            return UITableViewCell()
+        }
         return cell
     }
     
@@ -403,66 +373,40 @@ extension ForecastView: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         showView()
         
-        guard let model = collectionViewModels else { return }
+        guard let forecastModel = collectionViewModels?.collectionViewForHourModels else { return }
         
-        if indexPath.section == 0{
-            let link = model.collectionViewForHourModels[indexPath.row]
-            updateDetailedView(temperature: link.temperature,
-                               image: link.image,
-                               description: link.description,
-                               time: link.hour)
-            dayOfTheWeekLabel.text = numberOfSections[0] + ","
+        
+        switch indexPath.section {
+        case 0:
+            updateDetailedView(forecastModel: forecastModel[0][indexPath.row], dayModel: numberOfSections[indexPath.section])
             indexPathRow = indexPath.row
-            
-        }else if indexPath.section == 1{
-            let link = model.collectionViewForHourModels[indexPath.row + numberOfRows.count]
-            updateDetailedView(temperature: link.temperature,
-                               image: link.image,
-                               description: link.description,
-                               time: link.hour)
-            dayOfTheWeekLabel.text = numberOfSections[1] + ","
-            indexPathRow = indexPath.row + numberOfRows.count
-            
-        }else if indexPath.section == 2{
-            let link = model.collectionViewForHourModels[indexPath.row + 8 + numberOfRows.count]
-            updateDetailedView(temperature: link.temperature,
-                               image: link.image,
-                               description: link.description,
-                               time: link.hour)
-            dayOfTheWeekLabel.text = numberOfSections[2] + ","
-            indexPathRow = indexPath.row + numberOfRows.count + 8
-            
-        }else if indexPath.section == 3{
-            let link = model.collectionViewForHourModels[indexPath.row + 16 + numberOfRows.count]
-            
-            updateDetailedView(temperature: link.temperature,
-                               image: link.image,
-                               description: link.description,
-                               time: link.hour)
-            dayOfTheWeekLabel.text = numberOfSections[3] + ","
-            indexPathRow = indexPath.row + numberOfRows.count + 16
-            
-        }else if indexPath.section == 4{
-            let link = model.collectionViewForHourModels[indexPath.row + 24 + numberOfRows.count]
-            
-            updateDetailedView(temperature: link.temperature,
-                               image: link.image,
-                               description: link.description,
-                               time: link.hour)
-            dayOfTheWeekLabel.text = numberOfSections[4] + ","
-            indexPathRow = indexPath.row + numberOfRows.count + 24
-            
-        }else if indexPath.section == 5{
-            let link = model.collectionViewForHourModels[indexPath.row + 32 + numberOfRows.count]
-            
-            updateDetailedView(temperature: link.temperature,
-                               image: link.image,
-                               description: link.description,
-                               time: link.hour)
-            dayOfTheWeekLabel.text = numberOfSections[5] + ","
-            indexPathRow = indexPath.row + numberOfRows.count + 32
+            indexPathSection = indexPath.section
+        case 1:
+            updateDetailedView(forecastModel: forecastModel[1][indexPath.row], dayModel: numberOfSections[indexPath.section])
+            indexPathRow = indexPath.row
+            indexPathSection = indexPath.section
+        case 2:
+            updateDetailedView(forecastModel: forecastModel[2][indexPath.row], dayModel: numberOfSections[indexPath.section])
+            indexPathRow = indexPath.row
+            indexPathSection = indexPath.section
+        case 3:
+            updateDetailedView(forecastModel: forecastModel[3][indexPath.row], dayModel: numberOfSections[indexPath.section])
+            indexPathRow = indexPath.row
+            indexPathSection = indexPath.section
+        case 4:
+            updateDetailedView(forecastModel: forecastModel[4][indexPath.row], dayModel: numberOfSections[indexPath.section])
+            indexPathRow = indexPath.row
+            indexPathSection = indexPath.section
+        case 5:
+            updateDetailedView(forecastModel: forecastModel[5][indexPath.row], dayModel: numberOfSections[indexPath.section])
+            indexPathRow = indexPath.row
+            indexPathSection = indexPath.section
+        default:
+            updateDetailedView(forecastModel: forecastModel[5][indexPath.row], dayModel: numberOfSections[indexPath.section])
         }
-    }
+        
+
+        }
 }
 
 extension ForecastView: UICollectionViewDelegate, UICollectionViewDataSource {
@@ -474,32 +418,28 @@ extension ForecastView: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailedWeatherCollectionViewCell.identifier, for: indexPath) as! DetailedWeatherCollectionViewCell
+        if let model = collectionViewModels?.collectionViewForHourModels {
         
         switch indexPath.row {
         case 0:
-            let link = collectionViewModels?.collectionViewForHourModels[indexPathRow]
-            cell.label.text = link?.pressure
-            cell.imageView.image = UIImage(systemName: "thermometer")
+            cell.label.text = model[indexPathSection][indexPathRow].humidity
+            cell.imageView.image = WeatherImages.humidity
         case 1:
-            let link = collectionViewModels?.collectionViewForHourModels[indexPathRow]
-            cell.label.text = link?.humidity
-            cell.imageView.image = UIImage(systemName: "humidity")
+            cell.label.text = model[indexPathSection][indexPathRow].windiness
+            cell.imageView.image = WeatherImages.windSpeed
         case 2:
-            let link = collectionViewModels?.collectionViewForHourModels[indexPathRow]
-            cell.label.text = link?.visibility
-            cell.imageView.image = UIImage(systemName: "eye.fill")
+            cell.label.text = model[indexPathSection][indexPathRow].visibility
+            cell.imageView.image = WeatherImages.visibility
         case 3:
-            let link = collectionViewModels?.collectionViewForHourModels[indexPathRow]
-            cell.label.text = link?.feelsLike
-            cell.imageView.image = UIImage(systemName: "figure.stand")
+            cell.label.text = model[indexPathSection][indexPathRow].feelsLike
+            cell.imageView.image = WeatherImages.feelsLike
         case 4:
-            let link = collectionViewModels?.collectionViewForHourModels[indexPathRow]
-            cell.label.text = link?.windiness
-            cell.imageView.image = UIImage(systemName: "wind")
+            cell.label.text = model[indexPathSection][indexPathRow].pressure
+            cell.imageView.image = WeatherImages.pressure
         default:
             cell.label.text = "111"
+            }
         }
-        
         return cell
     }
 }

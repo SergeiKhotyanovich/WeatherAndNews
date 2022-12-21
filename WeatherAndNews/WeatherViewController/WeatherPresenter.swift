@@ -32,8 +32,10 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
     
     let dateFormatter = DateFormatter()
     let date = NSDate()
-    var numberOfSections:[String] = []
-    var numberOfRows:[String] = []
+    var numberOfSections: [String] = []
+    var numberOfRows: [String] = []
+    var numberOfRowsAt: [Int] = [8, 8, 8, 8]
+    var firstDayRowsCount = 0
     
     private weak var view: WeatherViewControllerProtocol?
     private var networkService: NetworkServiceProtokol
@@ -69,11 +71,24 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
         
         getWeather(location: location)
         getWeatherForecast(location: location)
+        
+//        fetchCity(location: location) { [weak self] (city) in
+//            guard let self = self else { return }
+//            DispatchQueue.main.async {
+//                self.weatherForecastModel = city
+//            }
+//
+//        }
     }
+    
+//    func fetchCity(location: Location, completion: @escaping (WeatherForecastModel?) -> Void) {
+//        networkService.getJSONData(location: location, completion: completion)
+//        
+//    }
     
     func getWeather(location: Location) {
         networkService.getWeather(location: location, completion: { [weak self] result in
-            guard let self = self else {return}
+            guard let self = self else { return }
             DispatchQueue.main.async {
                 switch result {
                 case .success(let weather):
@@ -97,6 +112,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
                     self.forecastWeatherView = self.prepareForecastWeatherViewModel(data: self.weatherForecastModel!)
                     self.updateCurrentView(dataCurrent: self.weatherCurrentModel!, dataForecast: self.weatherForecastModel!)
                     self.view?.successForecasView()
+
                 case .failure(let error):
                     self.view?.failure(error: error)
                 }
@@ -107,7 +123,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
     func getSearchCity(city: String) {
         networkService.getSearchCity(city: city, completion:  { [weak self] result in
             
-            guard let self = self else {return}
+            guard let self = self else { return }
             DispatchQueue.main.async {
                 switch result {
                 case .success(let city):
@@ -130,7 +146,6 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
         guard let city = searсhСityModel else { return }
         
         if !PreservationOfPopularCities.shared.popularCities.contains(city.first!.name) {
-            
             PreservationOfPopularCities.shared.popularCities.insert(city.first!.name, at: 0)
         }
     }
@@ -138,12 +153,14 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
     private func prepareForecastWeatherViewModel(data: WeatherForecastModel) -> ForecastWeatherViewModel {
         let dateFormatter = DateFormatter()
         var hourModel = [ForecastForHourCollectionViewModel]()
+        var outHourModel = [[ForecastForHourCollectionViewModel]]()
         var daysModels = [ForecastForDayModel]()
+        
         dateFormatter.locale = Locale(identifier: "en_RU")
         
-        for (_, hour) in data.list.enumerated(){
+        for (_, hour) in data.list.enumerated() {
             dateFormatter.dateFormat = "HH:mm"
-            let model = ForecastForHourCollectionViewModel(
+           let model = ForecastForHourCollectionViewModel(
                 hour: dateFormatter.string(from: Date(timeIntervalSince1970: Double(hour.dt))),
                 temperature: "\(Int(hour.main.temp))",
                 description: DataSource.weatherIDs[hour.weather[0].id ] ?? "",
@@ -154,9 +171,26 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
                 feelsLike: "\(Int(hour.main.feelsLike))°C",
                 windiness: "\(Int(hour.wind.speed))m/s"
             )
-            
             hourModel.append(model)
         }
+        
+        if firstDayRowsCount != 0, hourModel.count == 40 {
+            
+            let firstDay = Array(hourModel[0...firstDayRowsCount - 1])
+            let secondDay = Array(hourModel[firstDayRowsCount...firstDayRowsCount + 7])
+            let thirdDay = Array(hourModel[firstDayRowsCount + 8...firstDayRowsCount + 15])
+            let fourthDay = Array(hourModel[firstDayRowsCount + 16...firstDayRowsCount + 23])
+            let fifthDay = Array(hourModel[firstDayRowsCount + 24...firstDayRowsCount + 31])
+            let sixthDay = Array(hourModel[firstDayRowsCount + 32...hourModel.count - 1])
+            
+            outHourModel.append(firstDay)
+            outHourModel.append(secondDay)
+            outHourModel.append(thirdDay)
+            outHourModel.append(fourthDay)
+            outHourModel.append(fifthDay)
+            outHourModel.append(sixthDay)
+        }
+        
         for (_, day) in data.list.enumerated() {
             dateFormatter.dateFormat = "EEEE"
             let model = ForecastForDayModel(
@@ -164,7 +198,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
             )
             daysModels.append(model)
         }
-        return ForecastWeatherViewModel(days: daysModels, collectionViewForHourModels: hourModel)
+        return ForecastWeatherViewModel(days: daysModels, collectionViewForHourModels: outHourModel)
     }
     
     func getDayOfTheWeek() {
@@ -174,22 +208,29 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
         numberOfSections.append(stringDate)
         numberOfRows.append(stringDate)
         if (forecastWeatherView?.days) != nil{
-            for day in forecastWeatherView!.days{
+            for day in forecastWeatherView!.days {
                 let uniqueDay = day.day
-                if uniqueDay != numberOfSections[numberOfSections.count - 1]{
+                if uniqueDay != numberOfSections[numberOfSections.count - 1] {
                     numberOfSections.append(uniqueDay)
                 }
             }
-            for day in forecastWeatherView!.days{
+            for day in forecastWeatherView!.days {
                 let uniqueDay = day.day
-                if uniqueDay == numberOfRows[0]{
+                if uniqueDay == numberOfRows[0] {
                     numberOfRows.append(uniqueDay)
                 }
             }
+            numberOfRowsAt.insert(numberOfRows.count, at: 0)
+            numberOfRowsAt.append(8 - numberOfRows.count)
+            firstDayRowsCount = numberOfRowsAt[0]
+            print(numberOfRows)
+            print(numberOfRowsAt)
             
-            view?.successSectionCount(numberOfSections: numberOfSections, numberOfRows: numberOfRows)
+            view?.successSectionCount(numberOfSections: numberOfSections, numberOfRowsAt: numberOfRowsAt)
+
             numberOfRows = []
             numberOfSections = []
+            numberOfRowsAt = [8,8,8,8]
         }
     }
     
@@ -255,6 +296,8 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
             self.view?.successGettingData(currentWeatherViewModel: currentWeatherViewModel, forecastWeatherViewModel: forecastWeatherViewModel)
         }
     }
+    
+    
 }
 
 
