@@ -48,6 +48,11 @@ class TabBarViewController: UITabBarController, TabBarViewControllerProtocol {
     @objc func mapWeatherButtonPressed() {
         
         self.selectedIndex = 0
+        if weatherViewColtrollew.currentView.isHidden {
+            weatherViewColtrollew.pageControll.selectedSegmentIndex = 0
+            weatherViewColtrollew.currentView.isHidden = false
+            weatherViewColtrollew.forecastView.isHidden = true
+        }
     }
     
     func styleTabBar(){

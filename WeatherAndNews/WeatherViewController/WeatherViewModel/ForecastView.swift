@@ -259,6 +259,7 @@ class ForecastView: UIView {
         }
     }
     func showView(){
+        detailedWeatherСollectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .left, animated: false)
         detailedWeatherСollectionView.reloadData()
         backgroundView.isHidden = false
         
@@ -419,7 +420,7 @@ extension ForecastView: UICollectionViewDelegate, UICollectionViewDataSource {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailedWeatherCollectionViewCell.identifier, for: indexPath) as! DetailedWeatherCollectionViewCell
         if let model = collectionViewModels?.collectionViewForHourModels {
-        
+
         switch indexPath.row {
         case 0:
             cell.label.text = model[indexPathSection][indexPathRow].humidity

@@ -8,5 +8,6 @@ target 'WeatherAndNews' do
   # Pods for WeatherAndNews
 pod 'SnapKit', '~> 5.0.0'
 pod 'SwiftLint'
+pod 'RealmSwift'
 
 end

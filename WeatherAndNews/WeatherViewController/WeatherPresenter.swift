@@ -20,6 +20,7 @@ protocol weatherPresenterProtocol: NSObject {
     func getSearchCity(city: String)
     func getDayOfTheWeek()
     func updateMapViewWeatherButtonPressed(location: Location)
+    func updateSearchWeatherButtonPressed()
 }
 
 final class WeatherPresenter: NSObject, weatherPresenterProtocol {
@@ -148,6 +149,9 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
         if !PreservationOfPopularCities.shared.popularCities.contains(city.first!.name) {
             PreservationOfPopularCities.shared.popularCities.insert(city.first!.name, at: 0)
         }
+        if PreservationOfPopularCities.shared.popularCities.count > 9 {
+            PreservationOfPopularCities.shared.popularCities.removeLast()
+        }
     }
     
     private func prepareForecastWeatherViewModel(data: WeatherForecastModel) -> ForecastWeatherViewModel {
@@ -223,8 +227,6 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
             numberOfRowsAt.insert(numberOfRows.count, at: 0)
             numberOfRowsAt.append(8 - numberOfRows.count)
             firstDayRowsCount = numberOfRowsAt[0]
-            print(numberOfRows)
-            print(numberOfRowsAt)
             
             view?.successSectionCount(numberOfSections: numberOfSections, numberOfRowsAt: numberOfRowsAt)
 
