@@ -20,8 +20,8 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     private let titleNameLabel = UILabel()
     private let searchButoon = UIButton(type: .system)
     private let updateLocationButton = UIButton()
-    private var currentView = CurrentView(frame: .zero)
-    private var forecastView = ForecastView(frame: .zero)
+    var currentView = CurrentView(frame: .zero)
+    var forecastView = ForecastView(frame: .zero)
     private var searchView = SearchView(frame: .zero)
     private let notificationCenter = NotificationCenter.default
     
@@ -32,7 +32,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         return blurEffectView
     }()
     
-    private lazy var pageControll:UISegmentedControl = {
+    lazy var pageControll:UISegmentedControl = {
         let items = ["Current", "Forecast"]
         let view = UISegmentedControl(items: items)
         view.selectedSegmentIndex = 0
@@ -69,8 +69,10 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         
         forecastView.isHidden = true
         searchView.alpha = 0
+        searchView.backgroundColor = Color.main
         blurView.alpha = 0
         loadViewIndicator.center = view.center
+        presenter.updateWeatherButtonPressed()
     }
     
     func setupTarget() {
@@ -91,6 +93,10 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         searchView.updateSearchButton.addTarget(self,
                                                 action: #selector(searchUpdateButtonPress),
                                                 for: .touchUpInside)
+        
+        searchView.closeButton.addTarget(self,
+                                         action: #selector(animateIsHidenSearchView),
+                                         for: .touchUpInside)
         
         notificationCenter.addObserver(self,
                                        selector: #selector(mapViewWeatherLocation) ,
@@ -135,22 +141,6 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         updateLocationButton.setImage(UIImage(systemName: "location"), for: .normal)
     }
     
-    @objc func animateHidenSearchView() {
-        UIView.animate(withDuration: 0.3) {
-            self.searchView.alpha = 1
-            self.pageControll.alpha = 0
-            self.blurView.alpha = 1
-        }
-    }
-    
-    @objc func animateIsHidenSearchView() {
-        UIView.animate(withDuration: 0.3) {
-            self.searchView.alpha = 0
-            self.blurView.alpha = 0
-            self.pageControll.alpha = 1
-        }
-    }
-    
     //MARK: LAYOUT
     
     func setupLayout() {
@@ -189,9 +179,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         }
         
         searchView.snp.makeConstraints { make in
-            make.top.equalToSuperview()
-            make.right.left.equalToSuperview()
-            make.bottom.equalTo(pageControll)
+            make.edges.equalToSuperview()
         }
         
         blurView.snp.makeConstraints { make in
@@ -222,6 +210,24 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         guard let coordinate = notification.userInfo as? [String : Location] else { return }
         guard let location = coordinate["location"] else { return }
         presenter.updateMapViewWeatherButtonPressed(location: location)
+    }
+    
+    @objc func animateHidenSearchView() {
+        UIView.animate(withDuration: 0.3) {
+            self.searchView.alpha = 1
+            self.pageControll.alpha = 0
+            self.currentView.alpha = 0
+            self.forecastView.alpha = 0
+        }
+    }
+    
+    @objc func animateIsHidenSearchView() {
+        UIView.animate(withDuration: 0.3) {
+            self.searchView.alpha = 0
+            self.pageControll.alpha = 1
+            self.currentView.alpha = 1
+            self.forecastView.alpha = 1
+        }
     }
     
     
@@ -282,9 +288,10 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     }
     
     func showAlert() {
+        blurView.alpha = 0
+        loadViewIndicator.stopAnimating()
         let alertController = UIAlertController(title: "Error", message: "This city doesn't exist", preferredStyle: .alert)
         let alertAction = UIAlertAction(title: "Cancel", style: .cancel) {_ in
-            self.loadViewIndicator.stopAnimating()
         }
         alertController.addAction(alertAction)
         present(alertController, animated: true)

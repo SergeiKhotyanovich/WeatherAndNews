@@ -46,7 +46,6 @@ class MapViewController: UIViewController, MapViewControllerProtocoll {
     private let centerView: UIView = {
         let centerView = UIView()
         centerView.backgroundColor = .red
-        centerView.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 10, height: 10))
         centerView.layer.cornerRadius = 5
         return centerView
     }()
@@ -90,7 +89,11 @@ class MapViewController: UIViewController, MapViewControllerProtocoll {
             make.edges.equalToSuperview()
         }
         
-        centerView.center = view.center
+        centerView.snp.makeConstraints { make in
+            make.left.right.equalToSuperview().inset(view.frame.width/2 - 5)
+            make.bottom.equalToSuperview().inset(view.frame.height/2 + 13)
+            make.top.equalToSuperview().inset(view.frame.height/2 - 23)
+        }
         
         showWeatherButton.snp.makeConstraints { make in
             make.bottom.equalToSuperview().inset(100)
