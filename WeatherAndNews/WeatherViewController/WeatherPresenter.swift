@@ -4,7 +4,7 @@ import UIKit
 import CoreLocation
 
 protocol weatherPresenterProtocol: NSObject {
-    init(view:WeatherViewControllerProtocol, networkService: NetworkServiceProtokol, locationManager: LocationManagerProtocol)
+    init(view: WeatherViewControllerProtocol, networkService: NetworkServiceProtokol, locationManager: LocationManagerProtocol)
     
     var weatherCurrentModel: WeatherCurrentModel? {get set}
     var weatherForecastModel: WeatherForecastModel? {get set}
@@ -14,13 +14,13 @@ protocol weatherPresenterProtocol: NSObject {
     var numberOfSections:[String]{get set}
     var numberOfRows:[String]{get set}
     
-    func updateWeatherButtonPressed()
-    func getWeather(location: Location)
-    func getWeatherForecast(location: Location)
-    func getSearchCity(city: String)
+    func updateWeatherButtonPressed(temperature: String, language: String)
+    func getWeatherCurrent(location: Location, temperature: String, language: String)
+    func getWeatherForecast(location: Location, temperature: String, language: String)
+    func getSearchCity(city: String, temperature: String, language: String)
     func getDayOfTheWeek()
-    func updateMapViewWeatherButtonPressed(location: Location)
-    func updateSearchWeatherButtonPressed()
+    func updateMapViewWeatherButtonPressed(location: Location, temperature: String, language: String)
+    func updateSearchWeatherButtonPressed(temperature: String, language: String)
 }
 
 final class WeatherPresenter: NSObject, weatherPresenterProtocol {
@@ -37,6 +37,9 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
     var numberOfRows: [String] = []
     var numberOfRowsAt: [Int] = [8, 8, 8, 8]
     var firstDayRowsCount = 0
+    var userTemperature = ""
+    var userLanguage = ""
+    var weatherID: [Int:String] = [0:""]
     
     private weak var view: WeatherViewControllerProtocol?
     private var networkService: NetworkServiceProtokol
@@ -49,29 +52,29 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
         self.view = view
     }
     
-    func updateWeatherButtonPressed() {
+    func updateWeatherButtonPressed(temperature: String, language: String) {
         locationManager.updateLocation()
         locationManager.location = { [weak self] result in
-            self?.getWeather(location: result)
-            self?.getWeatherForecast(location: result)
+            self?.getWeatherCurrent(location: result, temperature: temperature, language: language)
+            self?.getWeatherForecast(location: result, temperature: temperature, language: language)
         }
     }
     
-    func updateMapViewWeatherButtonPressed(location: Location) {
-        getWeather(location: location)
-        getWeatherForecast(location: location)
+    func updateMapViewWeatherButtonPressed(location: Location, temperature: String, language: String ) {
+        getWeatherCurrent(location: location, temperature: temperature, language: language)
+        getWeatherForecast(location: location, temperature: temperature, language: language)
         
     }
     
-    func updateSearchWeatherButtonPressed() {
+    func updateSearchWeatherButtonPressed(temperature: String, language: String) {
         guard let searсhСityModel = searсhСityModel else {
             return
         }
         let location = Location(longitude: String(searсhСityModel.first?.lon ?? 0),
                                 lotitude: String(searсhСityModel.first?.lat ?? 0))
         
-        getWeather(location: location)
-        getWeatherForecast(location: location)
+        getWeatherCurrent(location: location, temperature: temperature, language: language)
+        getWeatherForecast(location: location, temperature: temperature, language: language)
         
 //        fetchCity(location: location) { [weak self] (city) in
 //            guard let self = self else { return }
@@ -87,15 +90,14 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
 //        
 //    }
     
-    func getWeather(location: Location) {
-        networkService.getWeather(location: location, completion: { [weak self] result in
+    func getWeatherCurrent(location: Location, temperature: String, language: String) {
+        networkService.getWeather(location: location, temperature: temperature, language: language, completion: { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 switch result {
                 case .success(let weather):
                     self.weatherCurrentModel = weather
                     self.currentWeatherViewModel = self.prepereCurrentWeatherViewModel(data: self.weatherCurrentModel!)
-                    self.view?.success()
                 case .failure(let error):
                     self.view?.failure(error: error)
                 }
@@ -103,8 +105,8 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
         })
     }
     
-    func getWeatherForecast(location: Location) {
-        networkService.getWeatherForecast(location: location, completion:  { [weak self] result in
+    func getWeatherForecast(location: Location, temperature: String, language: String) {
+        networkService.getWeatherForecast(location: location,  temperature: temperature, language: language, completion:  { [weak self] result in
             guard let self = self else {return}
             DispatchQueue.main.async { [self] in
                 switch result {
@@ -121,7 +123,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
         })
     }
     
-    func getSearchCity(city: String) {
+    func getSearchCity(city: String, temperature: String, language: String) {
         networkService.getSearchCity(city: city, completion:  { [weak self] result in
             
             guard let self = self else { return }
@@ -133,7 +135,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
                         self.view?.showAlert()
                     }else{
                         self.searсhСityModel = city
-                        self.updateSearchWeatherButtonPressed()
+                        self.updateSearchWeatherButtonPressed(temperature: temperature, language: language)
                         self.addOnlyUniqueSities()
                     }
                 case .failure(let error):
@@ -155,6 +157,9 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
     }
     
     private func prepareForecastWeatherViewModel(data: WeatherForecastModel) -> ForecastWeatherViewModel {
+        setupUserTemperature()
+        setupUserLanguage()
+            
         let dateFormatter = DateFormatter()
         var hourModel = [ForecastForHourCollectionViewModel]()
         var outHourModel = [[ForecastForHourCollectionViewModel]]()
@@ -166,13 +171,13 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
             dateFormatter.dateFormat = "HH:mm"
            let model = ForecastForHourCollectionViewModel(
                 hour: dateFormatter.string(from: Date(timeIntervalSince1970: Double(hour.dt))),
-                temperature: "\(Int(hour.main.temp))",
-                description: DataSource.weatherIDs[hour.weather[0].id ] ?? "",
+                temperature: "\(Int(hour.main.temp))°\(userTemperature)",
+                description: weatherID[hour.weather[0].id ] ?? "",
                 image: WeatherImages.getWeatherPic(name: hour.weather[0].icon) ?? UIImage.systemNamed("sun.max"),
                 pressure: "\(Int(hour.main.pressure))hPa",
                 humidity: "\(Int(hour.main.humidity))%",
                 visibility: "\(Int(hour.visibility))M",
-                feelsLike: "\(Int(hour.main.feelsLike))°C",
+                feelsLike: "\(Int(hour.main.feelsLike))°\(userTemperature)",
                 windiness: "\(Int(hour.wind.speed))m/s"
             )
             hourModel.append(model)
@@ -237,11 +242,12 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
     }
     
     func prepereCurrentWeatherViewModel(data: WeatherCurrentModel) -> CurrentWeatherViewModel {
+        setupUserLanguage()
         let currentWeatherCollectionViewModel = self.prepareCurrentWeatherCollectionVievModel(data: data)
         let model = CurrentWeatherViewModel(
             weatherPicture: WeatherImages.getWeatherPic(name: (data.weather[0].icon))!,
             cityLabel: data.name,
-            weatherLabel: DataSource.weatherIDs[data.weather[0].id]!,
+            weatherLabel: weatherID[data.weather[0].id]!,
             tempLabel: "\(Int(data.main.temp))°",
             currentWeatherCollectionVievModel: currentWeatherCollectionViewModel[0])
         
@@ -249,6 +255,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
     }
     
     func prepareCurrentWeatherCollectionVievModel(data: WeatherCurrentModel) -> [[CurrentWeatherCollectionVievModel]] {
+        setupUserTemperature()
         let parameters = [
             WeatherParameters.pressure,
             WeatherParameters.humidity,
@@ -277,13 +284,13 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
             case .сloudiness:
                 model = CurrentWeatherCollectionVievModel(description: "\(data.clouds.all)%", image: WeatherImages.сloudiness!)
             case .feelsLike:
-                model = CurrentWeatherCollectionVievModel(description: "\(Int(data.main.feelsLike))°C", image: WeatherImages.feelsLike!)
+                model = CurrentWeatherCollectionVievModel(description: "\(Int(data.main.feelsLike))°\(userTemperature)", image: WeatherImages.feelsLike!)
             case .rainfall:
                 model = CurrentWeatherCollectionVievModel(description: "\(data.clouds.all)%", image: WeatherImages.rainfall!)
             case .tempMax:
-                model = CurrentWeatherCollectionVievModel(description: "\(Int(data.main.tempMax))°C", image: WeatherImages.tempMax!)
+                model = CurrentWeatherCollectionVievModel(description: "\(Int(data.main.tempMax))°\(userTemperature)", image: WeatherImages.tempMax!)
             case .tempMin:
-                model = CurrentWeatherCollectionVievModel(description: "\(Int(data.main.tempMin))°C", image: WeatherImages.tempMin!)
+                model = CurrentWeatherCollectionVievModel(description: "\(Int(data.main.tempMin))°\(userTemperature)", image: WeatherImages.tempMin!)
             }
             models.append(model)
         }
@@ -296,6 +303,24 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
             let currentWeatherViewModel = self.prepereCurrentWeatherViewModel(data: dataCurrent)
             let forecastWeatherViewModel = self.prepareForecastWeatherViewModel(data: dataForecast)
             self.view?.successGettingData(currentWeatherViewModel: currentWeatherViewModel, forecastWeatherViewModel: forecastWeatherViewModel)
+        }
+    }
+    
+    private func setupUserTemperature() {
+        switch UserTemperature.shared.userTemperature {
+        case "imperial":
+            userTemperature = "F"
+        default:
+            userTemperature = "C"
+        }
+    }
+    
+    private func setupUserLanguage() {
+        switch UserLanguage.shared.userLanguage {
+        case "ru":
+            weatherID = DataSource.weatherIDsRu
+        default:
+            weatherID = DataSource.weatherIDsEn
         }
     }
     

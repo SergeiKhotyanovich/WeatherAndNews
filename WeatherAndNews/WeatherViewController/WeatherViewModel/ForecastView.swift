@@ -241,7 +241,7 @@ class ForecastView: UIView {
     }
     
     func updateDetailedView(forecastModel: ForecastForHourCollectionViewModel, dayModel: String) {
-        tempDetailedView.text = forecastModel.temperature + "°C"
+        tempDetailedView.text = forecastModel.temperature
         currentWeatherImageView.image = forecastModel.image
         weatherDescriptionLabel.text = forecastModel.description
         timeLabel.text = forecastModel.hour

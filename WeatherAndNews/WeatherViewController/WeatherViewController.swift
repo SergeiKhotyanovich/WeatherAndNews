@@ -3,8 +3,6 @@ import UIKit
 import SnapKit
 
 protocol WeatherViewControllerProtocol: AnyObject {
-    func setAnotherView()
-    func success()
     func failure(error: Error)
     func successForecasView()
     func successSectionCount(numberOfSections:[String], numberOfRowsAt:[Int])
@@ -20,10 +18,19 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     private let titleNameLabel = UILabel()
     private let searchButoon = UIButton(type: .system)
     private let updateLocationButton = UIButton()
+    private let notificationCenter = NotificationCenter.default
+    private var searchView = SearchView(frame: .zero)
     var currentView = CurrentView(frame: .zero)
     var forecastView = ForecastView(frame: .zero)
-    private var searchView = SearchView(frame: .zero)
-    private let notificationCenter = NotificationCenter.default
+    
+    private let settingButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.contentVerticalAlignment = .fill
+        button.contentHorizontalAlignment = .fill
+        button.setImage(UIImage(systemName: "gearshape"), for: .normal)
+        button.tintColor = Color.secondary
+        return button
+    }()
     
     private let blurView: UIVisualEffectView = {
         let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.dark)
@@ -62,7 +69,8 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
             titleNameLabel,searchButoon,
             updateLocationButton,searchView,
             pageControll, currentView,
-            forecastView, blurView, loadViewIndicator
+            forecastView, blurView, loadViewIndicator,
+            settingButton
         ])
         searchView.backgroundColor = Color.main
         view.backgroundColor = UIColor(named: "main")
@@ -72,7 +80,8 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         searchView.backgroundColor = Color.main
         blurView.alpha = 0
         loadViewIndicator.center = view.center
-        presenter.updateWeatherButtonPressed()
+        presenter.updateWeatherButtonPressed(temperature: UserTemperature.shared.userTemperature,
+                                             language: UserLanguage.shared.userLanguage)
     }
     
     func setupTarget() {
@@ -97,6 +106,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         searchView.closeButton.addTarget(self,
                                          action: #selector(animateIsHidenSearchView),
                                          for: .touchUpInside)
+        settingButton.addTarget(self, action: #selector(goToSettingVC), for: .touchUpInside)
         
         notificationCenter.addObserver(self,
                                        selector: #selector(mapViewWeatherLocation) ,
@@ -186,22 +196,28 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
             make.top.equalTo(pageControll).inset(35)
             make.right.left.bottom.equalToSuperview()
         }
-        //       spiner.snp.makeConstraints { make in
-        //          make.top.right.left.bottom.equalToSuperview()
-        //        }
+        
+        settingButton.snp.makeConstraints { make in
+            make.left.equalTo(updateLocationButton.snp.right).offset(15)
+            make.top.equalToSuperview().inset(50)
+            make.height.width.equalTo(25)
+        }
     }
     
     //MARK: FUNC
     
     @objc func searchUpdateButtonPress() {
         guard let cityName = searchView.searchTextField.text else { return }
-        self.presenter.getSearchCity(city: cityName)
+        self.presenter.getSearchCity(city: cityName,
+                                     temperature: UserTemperature.shared.userTemperature,
+                                     language: UserLanguage.shared.userLanguage)
         showLoadViewIndicator()
     }
     
     
     @objc func updateWeatherButtonPressed() {
-        self.presenter.updateWeatherButtonPressed()
+        self.presenter.updateWeatherButtonPressed(temperature: UserTemperature.shared.userTemperature,
+                                                  language: UserLanguage.shared.userLanguage)
         showLoadViewIndicator()
     }
     
@@ -209,7 +225,8 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         showLoadViewIndicator()
         guard let coordinate = notification.userInfo as? [String : Location] else { return }
         guard let location = coordinate["location"] else { return }
-        presenter.updateMapViewWeatherButtonPressed(location: location)
+        presenter.updateMapViewWeatherButtonPressed(location: location, temperature: UserTemperature.shared.userTemperature,
+                                                    language: UserLanguage.shared.userLanguage)
     }
     
     @objc func animateHidenSearchView() {
@@ -218,6 +235,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
             self.pageControll.alpha = 0
             self.currentView.alpha = 0
             self.forecastView.alpha = 0
+            self.settingButton.alpha = 0
         }
     }
     
@@ -227,16 +245,8 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
             self.pageControll.alpha = 1
             self.currentView.alpha = 1
             self.forecastView.alpha = 1
+            self.settingButton.alpha = 1
         }
-    }
-    
-    
-    @objc func setAnotherView() {
-        //        self.presenter.showFitstView()
-    }
-    
-    func success() {
-        
     }
     
     func failure(error: Error) {
@@ -295,5 +305,25 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         }
         alertController.addAction(alertAction)
         present(alertController, animated: true)
+    }
+    
+    @objc func goToSettingVC() {
+        let vc = SettingBuilder.build()
+        
+        
+        if UserTemperature.shared.userTemperature == "imperial" {
+            vc.temperatureSegmentControl.selectedSegmentIndex = 1
+        }
+        
+        if UserLanguage.shared.userLanguage == "ru" {
+            vc.languageSegmentControl.selectedSegmentIndex = 1
+        }
+        
+        if UserTheme.shared.userTheme == "Dark" {
+            vc.themeSegmentControl.selectedSegmentIndex = 1
+        }
+        
+        vc.modalPresentationStyle = .fullScreen
+        self.present(vc, animated: true)
     }
 }

@@ -3,16 +3,16 @@ import Foundation
 import CoreLocation
 
 protocol NetworkServiceProtokol: NSObject {
-    func getWeather(location: Location, completion: @escaping (Result<WeatherCurrentModel?, Error>) -> Void )
-    func getWeatherForecast(location: Location, completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void)
+    func getWeather(location: Location, temperature: String, language: String, completion: @escaping (Result<WeatherCurrentModel?, Error>) -> Void )
+    func getWeatherForecast(location: Location,temperature: String, language: String, completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void)
     func getSearchCity(city: String, completion: @escaping (Result<LocationCityModel?, Error>) -> Void)
 //    func getJSONData<T: Decodable>(location: Location, completion: @escaping (T?) -> Void)
 }
 
 class NetworkService:NSObject, NetworkServiceProtokol {
     
-    func getWeather(location: Location, completion: @escaping (Result<WeatherCurrentModel?, Error>) -> Void) {
-        let urlString = "https://api.openweathermap.org/data/2.5/weather?lat=\(location.lotitude)&lon=\(location.longitude)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=metric"
+    func getWeather(location: Location, temperature: String, language: String, completion: @escaping (Result<WeatherCurrentModel?, Error>) -> Void) {
+        let urlString = "https://api.openweathermap.org/data/2.5/weather?lat=\(location.lotitude)&lon=\(location.longitude)&lang=\(language)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=\(temperature)"
         
         guard let url = URL(string: urlString) else {return}
         
@@ -30,8 +30,8 @@ class NetworkService:NSObject, NetworkServiceProtokol {
         }.resume()
     }
     
-    func getWeatherForecast(location: Location,  completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void) {
-        let urlString = "https://api.openweathermap.org/data/2.5/forecast?lat=\(location.lotitude)&lon=\(location.longitude)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=metric"
+    func getWeatherForecast(location: Location, temperature: String, language: String, completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void) {
+        let urlString = "https://api.openweathermap.org/data/2.5/forecast?lat=\(location.lotitude)&lon=\(location.longitude)&lang=\(language)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=\(temperature)"
         
         guard let url = URL(string: urlString) else {return}
         let urlRequest = URLRequest(url: url)
