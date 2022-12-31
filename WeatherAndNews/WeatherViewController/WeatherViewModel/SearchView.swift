@@ -110,7 +110,7 @@ class SearchView: UIView {
         }
         closeButton.snp.makeConstraints { make in
             make.left.right.equalToSuperview()
-            make.bottom.equalToSuperview().inset(80)
+            make.bottom.equalToSuperview().inset(self.frame.height/12)
         }
     }
     
