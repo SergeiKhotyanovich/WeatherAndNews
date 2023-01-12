@@ -9,13 +9,14 @@ extension NSNotification.Name {
     static let mapViewWeatherLocation = NSNotification.Name.init("mapViewWeatherLocation")
 }
 
-protocol MapViewControllerProtocoll: NSObject {
-    
+protocol MapViewControllerProtocol: NSObject {
+    func goToUserLocationButtonPressed()
+    func updateViewSetCenter(location: Location)
 }
 
-class MapViewController: UIViewController, MapViewControllerProtocoll {
+class MapViewController: UIViewController, MapViewControllerProtocol {
     
-    public var presenter: MapPresenterProtokol!
+    var presenter: MapPresenterProtokol!
     
     private let mapView = MKMapView()
     private let locationManager = CLLocationManager()
@@ -33,7 +34,7 @@ class MapViewController: UIViewController, MapViewControllerProtocoll {
         return showWeatherButton
     }()
     
-    private let setCameraCenterView: UIButton = {
+    private let goToUserLocationButton: UIButton = {
         let showWeatherButton = UIButton(type: .custom)
         showWeatherButton.backgroundColor = Color.element
         showWeatherButton.contentMode = .scaleToFill
@@ -58,23 +59,27 @@ class MapViewController: UIViewController, MapViewControllerProtocoll {
         setupDelegat()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        centerView.layer.cornerRadius = centerView.frame.width / 2
+        
+    }
+    
     func setupUI() {
         view.addSubviews([
             mapView,
             centerView,
             showWeatherButton,
-            setCameraCenterView
+            goToUserLocationButton
         ])
         
         mapView.showsUserLocation = true
         mapView.showsScale = true
         mapView.showsCompass = true
-        
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.startUpdatingLocation()
+
         showWeatherButton.addTarget(self, action: #selector(mapWeatherButtonPressed), for: .touchUpInside)
-        setCameraCenterView.addTarget(self, action: #selector(setCameraCenterViewPressed), for: .touchUpInside)
+        goToUserLocationButton.addTarget(self, action: #selector(goToUserLocationButtonPressed), for: .touchUpInside)
     }
     
     func setupDelegat() {
@@ -102,7 +107,7 @@ class MapViewController: UIViewController, MapViewControllerProtocoll {
             make.height.equalTo(35)
         }
         
-        setCameraCenterView.snp.makeConstraints { make in
+        goToUserLocationButton.snp.makeConstraints { make in
             make.right.equalToSuperview().inset(16)
             make.bottom.equalTo(showWeatherButton.snp.top).inset(-12)
             make.width.equalTo(45)
@@ -123,19 +128,19 @@ class MapViewController: UIViewController, MapViewControllerProtocoll {
         notificationCenter.post(name: NSNotification.Name.mapViewWeatherLocation, object: self, userInfo: ["location":location])
     }
     
-    @objc func setCameraCenterViewPressed() {
-        guard let location = locationCenter?.coordinate else {
-            return
-        }
-        mapView.setCenter(location, animated: true)
+    @objc func goToUserLocationButtonPressed() {
+        presenter.setUserLocation()
+    }
+    
+    func updateViewSetCenter(location: Location) {
+
+        mapView.setCenter(CLLocationCoordinate2D(latitude: Double(location.lotitude) ?? 10, longitude: Double(location.longitude) ?? 10), animated: true)
     }
 }
-
 extension MapViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         locationCenter = locations.first
-
     }
 }
 

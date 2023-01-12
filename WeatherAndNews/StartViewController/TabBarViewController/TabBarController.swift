@@ -3,13 +3,14 @@ import UIKit
 import SnapKit
 
 protocol TabBarViewControllerProtocol: AnyObject {
+    
 }
 
 class TabBarViewController: UITabBarController, TabBarViewControllerProtocol {
     var presenter: TabBarPresenterProtocol!
     
     let weatherViewColtrollew = WeatherBuilder.build()
-    let mapViewController = MapViewController()
+    let mapViewController = MapBuilder.build()
     let notificationCenter = NotificationCenter.default
     private let degreesLabel = UILabel()
     

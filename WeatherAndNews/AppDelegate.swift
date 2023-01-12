@@ -14,10 +14,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        let LoadingVC = LoadingBuilder.build()
-        let TabBarVC = TabBarViewController()
-        let navigatorLoadingVC = UINavigationController(rootViewController: LoadingVC)
-        _ = UINavigationController(rootViewController: TabBarVC)
+        let loadingVC = LoadingBuilder.build()
+        let tabBarVC = TabBarViewController()
+        let navigatorLoadingVC = UINavigationController(rootViewController: loadingVC)
+        _ = UINavigationController(rootViewController: tabBarVC)
         
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = navigatorLoadingVC

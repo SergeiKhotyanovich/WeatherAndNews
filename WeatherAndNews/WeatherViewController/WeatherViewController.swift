@@ -12,11 +12,11 @@ protocol WeatherViewControllerProtocol: AnyObject {
 
 class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     
-    var presenter: weatherPresenterProtocol!
+    var presenter: WeatherPresenterProtocol!
     private var forecastViewModel: ForecastWeatherViewModel?
     
     private let titleNameLabel = UILabel()
-    private let searchButoon = UIButton(type: .system)
+    private let searchButtun = UIButton(type: .system)
     private let updateLocationButton = UIButton()
     private let notificationCenter = NotificationCenter.default
     private var searchView = SearchView(frame: .zero)
@@ -66,7 +66,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     
     func setupUI() {
         view.addSubviews([
-            titleNameLabel,searchButoon,
+            titleNameLabel,searchButtun,
             updateLocationButton,searchView,
             pageControll, currentView,
             forecastView, blurView, loadViewIndicator,
@@ -80,8 +80,9 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         searchView.backgroundColor = Color.main
         blurView.alpha = 0
         loadViewIndicator.center = view.center
-        presenter.updateWeatherButtonPressed(temperature: UserTemperature.shared.userTemperature,
-                                             language: UserLanguage.shared.userLanguage)
+        presenter.updateWeatherButtonPressed(temperature: UserTemperaturePreservation.shared.userTemperature,
+                                             language: UserLanguagePreservation
+.shared.userLanguage)
     }
     
     func setupTarget() {
@@ -91,7 +92,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         pageControll.addTarget(self,
                                action: #selector(changeScreenWeather),
                                for: .allEvents)
-        searchButoon.addTarget(self,
+        searchButtun.addTarget(self,
                                action: #selector(animateHidenSearchView),
                                for: .touchUpInside)
         
@@ -118,8 +119,8 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     
     func setupStyle() {
         titleNameLabelStyle()
-        searchButoonStyle()
-        locationButoonStyle()
+        searchButtunStyle()
+        locationButtonStyle()
     }
     
     func titleNameLabelStyle() {
@@ -131,17 +132,17 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         titleNameLabel.minimumScaleFactor = 0.2
     }
     
-    func searchButoonStyle() {
-        searchButoon.contentVerticalAlignment = .fill
-        searchButoon.contentHorizontalAlignment = .fill
-        searchButoon.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
-        searchButoon.tintColor = Color.secondary
-        searchButoon.snp.makeConstraints { make in
+    func searchButtunStyle() {
+        searchButtun.contentVerticalAlignment = .fill
+        searchButtun.contentHorizontalAlignment = .fill
+        searchButtun.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        searchButtun.tintColor = Color.secondary
+        searchButtun.snp.makeConstraints { make in
             make.width.height.equalTo(25)
         }
     }
     
-    func locationButoonStyle() {
+    func locationButtonStyle() {
         updateLocationButton.contentVerticalAlignment = .fill
         updateLocationButton.contentHorizontalAlignment = .fill
         updateLocationButton.snp.makeConstraints { make in
@@ -161,13 +162,13 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
             make.top.equalToSuperview().inset(15)
         }
         
-        searchButoon.snp.makeConstraints { make in
-            make.left.equalTo(titleNameLabel.snp.right).offset(10)
-            make.top.equalToSuperview().inset(50)
+        searchButtun.snp.makeConstraints {
+            $0.left.equalTo(titleNameLabel.snp.right).offset(10)
+            $0.top.equalToSuperview().inset(50)
         }
         
         updateLocationButton.snp.makeConstraints { make in
-            make.left.equalTo(searchButoon.snp.right).offset(10)
+            make.left.equalTo(searchButtun.snp.right).offset(10)
             make.top.equalToSuperview().inset(50)
         }
         
@@ -207,26 +208,31 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     //MARK: FUNC
     
     @objc func searchUpdateButtonPress() {
+        showLoadViewIndicator()
+        
         guard let cityName = searchView.searchTextField.text else { return }
         self.presenter.getSearchCity(city: cityName,
-                                     temperature: UserTemperature.shared.userTemperature,
-                                     language: UserLanguage.shared.userLanguage)
-        showLoadViewIndicator()
+                                     temperature: UserTemperaturePreservation.shared.userTemperature,
+                                     language: UserLanguagePreservation
+.shared.userLanguage)
     }
     
     
     @objc func updateWeatherButtonPressed() {
-        self.presenter.updateWeatherButtonPressed(temperature: UserTemperature.shared.userTemperature,
-                                                  language: UserLanguage.shared.userLanguage)
         showLoadViewIndicator()
+        
+        self.presenter.updateWeatherButtonPressed(temperature: UserTemperaturePreservation.shared.userTemperature,
+                                                  language: UserLanguagePreservation
+.shared.userLanguage)
     }
     
     @objc func mapViewWeatherLocation(notification: Notification) {
         showLoadViewIndicator()
         guard let coordinate = notification.userInfo as? [String : Location] else { return }
         guard let location = coordinate["location"] else { return }
-        presenter.updateMapViewWeatherButtonPressed(location: location, temperature: UserTemperature.shared.userTemperature,
-                                                    language: UserLanguage.shared.userLanguage)
+        presenter.updateMapViewWeatherButtonPressed(location: location, temperature: UserTemperaturePreservation.shared.userTemperature,
+                                                    language: UserLanguagePreservation
+.shared.userLanguage)
     }
     
     @objc func animateHidenSearchView() {
@@ -311,15 +317,15 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         let vc = SettingBuilder.build()
         
         
-        if UserTemperature.shared.userTemperature == "imperial" {
+        if UserTemperaturePreservation.shared.userTemperature == UserTemperaturePreservation.userTemperatureSelection.fahrenheit.rawValue {
             vc.temperatureSegmentControl.selectedSegmentIndex = 1
         }
         
-        if UserLanguage.shared.userLanguage == "ru" {
+        if UserLanguagePreservation.shared.userLanguage == UserLanguagePreservation.userLanguageSelection.ru.rawValue {
             vc.languageSegmentControl.selectedSegmentIndex = 1
         }
         
-        if UserTheme.shared.userTheme == "Dark" {
+        if UserThemePreservation.shared.userTheme == UserThemePreservation.userThemeSelection.dark.rawValue {
             vc.themeSegmentControl.selectedSegmentIndex = 1
         }
         
