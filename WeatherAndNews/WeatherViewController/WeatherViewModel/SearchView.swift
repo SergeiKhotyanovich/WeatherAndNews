@@ -176,6 +176,7 @@ extension SearchView: UICollectionViewDelegate, UICollectionViewDataSource, UICo
         return cell
         
     }
+
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         searchTextField.text = PreservationOfPopularCities.shared.popularCities[indexPath.row]

@@ -3,7 +3,7 @@ import Foundation
 import UIKit
 import CoreLocation
 
-protocol weatherPresenterProtocol: NSObject {
+protocol WeatherPresenterProtocol: NSObject {
     init(view: WeatherViewControllerProtocol, networkService: NetworkServiceProtokol, locationManager: LocationManagerProtocol)
     
     var weatherCurrentModel: WeatherCurrentModel? {get set}
@@ -23,7 +23,7 @@ protocol weatherPresenterProtocol: NSObject {
     func updateSearchWeatherButtonPressed(temperature: String, language: String)
 }
 
-final class WeatherPresenter: NSObject, weatherPresenterProtocol {
+final class WeatherPresenter: NSObject, WeatherPresenterProtocol {
     
     var weatherCurrentModel: WeatherCurrentModel?
     var weatherForecastModel: WeatherForecastModel?
@@ -39,6 +39,9 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
     var firstDayRowsCount = 0
     var userTemperature = ""
     var userLanguage = ""
+    var userLocale = ""
+    var userPressure = ""
+    var userSpeed = ""
     var weatherID: [Int:String] = [0:""]
     
     private weak var view: WeatherViewControllerProtocol?
@@ -165,7 +168,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
         var outHourModel = [[ForecastForHourCollectionViewModel]]()
         var daysModels = [ForecastForDayModel]()
         
-        dateFormatter.locale = Locale(identifier: "en_RU")
+        dateFormatter.locale = Locale(identifier: userLocale)
         
         for (_, hour) in data.list.enumerated() {
             dateFormatter.dateFormat = "HH:mm"
@@ -174,11 +177,11 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
                 temperature: "\(Int(hour.main.temp))°\(userTemperature)",
                 description: weatherID[hour.weather[0].id ] ?? "",
                 image: WeatherImages.getWeatherPic(name: hour.weather[0].icon) ?? UIImage.systemNamed("sun.max"),
-                pressure: "\(Int(hour.main.pressure))hPa",
+                pressure: "\(Int(hour.main.pressure))\(userPressure)",
                 humidity: "\(Int(hour.main.humidity))%",
                 visibility: "\(Int(hour.visibility))M",
                 feelsLike: "\(Int(hour.main.feelsLike))°\(userTemperature)",
-                windiness: "\(Int(hour.wind.speed))m/s"
+                windiness: "\(Int(hour.wind.speed))\(userSpeed)"
             )
             hourModel.append(model)
         }
@@ -211,7 +214,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
     }
     
     func getDayOfTheWeek() {
-        dateFormatter.locale = Locale(identifier: "en_RU")
+        dateFormatter.locale = Locale(identifier: userLocale)
         dateFormatter.dateFormat = "EEEE"
         let stringDate: String = dateFormatter.string(from: date as Date)
         numberOfSections.append(stringDate)
@@ -274,11 +277,11 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
             var model: CurrentWeatherCollectionVievModel
             switch parameter {
             case .pressure:
-                model = CurrentWeatherCollectionVievModel(description: "\(data.main.pressure)hPa", image: WeatherImages.pressure!)
+                model = CurrentWeatherCollectionVievModel(description: "\(data.main.pressure)\(userPressure)", image: WeatherImages.pressure!)
             case .humidity:
                 model = CurrentWeatherCollectionVievModel(description: "\(data.main.humidity)%", image: WeatherImages.humidity!)
             case .windSpeed:
-                model = CurrentWeatherCollectionVievModel(description: "\(Int(data.wind.speed))m/s", image: WeatherImages.windSpeed!)
+                model = CurrentWeatherCollectionVievModel(description: "\(Int(data.wind.speed))\(userSpeed)", image: WeatherImages.windSpeed!)
             case .visibility:
                 model = CurrentWeatherCollectionVievModel(description: "\(data.visibility)M", image: WeatherImages.visibility!)
             case .сloudiness:
@@ -307,7 +310,7 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
     }
     
     private func setupUserTemperature() {
-        switch UserTemperature.shared.userTemperature {
+        switch UserTemperaturePreservation.shared.userTemperature {
         case "imperial":
             userTemperature = "F"
         default:
@@ -316,11 +319,18 @@ final class WeatherPresenter: NSObject, weatherPresenterProtocol {
     }
     
     private func setupUserLanguage() {
-        switch UserLanguage.shared.userLanguage {
+        switch UserLanguagePreservation
+.shared.userLanguage {
         case "ru":
             weatherID = DataSource.weatherIDsRu
+            userPressure = "гПа"
+            userSpeed = "м/c"
+            userLocale = "ru_RU"
         default:
             weatherID = DataSource.weatherIDsEn
+            userPressure = "hPa"
+            userSpeed = "m/s"
+            userLocale = "en_RU"
         }
     }
     

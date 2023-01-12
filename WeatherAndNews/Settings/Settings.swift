@@ -23,8 +23,13 @@ class PreservationOfPopularCities {
     }
 }
 
-class UserTemperature {
-    static let shared = UserTemperature()
+class UserTemperaturePreservation {
+    static let shared = UserTemperaturePreservation()
+    
+    enum userTemperatureSelection: String {
+        case fahrenheit = "imperial"
+        case celsius = "metric"
+    }
     
     var userTemperature: String {
         set {
@@ -38,8 +43,13 @@ class UserTemperature {
     }
 }
 
-class UserLanguage {
-    static let shared = UserLanguage()
+class UserLanguagePreservation {
+    static let shared = UserLanguagePreservation()
+    
+    enum userLanguageSelection: String {
+        case ru = "ru"
+        case en = "en"
+    }
     
     var userLanguage: String {
         set {
@@ -53,8 +63,13 @@ class UserLanguage {
     }
 }
 
-class UserTheme {
-    static let shared = UserTheme()
+class UserThemePreservation {
+    static let shared = UserThemePreservation()
+    
+    enum userThemeSelection: String {
+        case light = "light"
+        case dark = "dark"
+    }
     
     var userTheme: String {
         set {

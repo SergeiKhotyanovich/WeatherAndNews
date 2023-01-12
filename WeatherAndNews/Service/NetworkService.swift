@@ -14,7 +14,7 @@ class NetworkService:NSObject, NetworkServiceProtokol {
     func getWeather(location: Location, temperature: String, language: String, completion: @escaping (Result<WeatherCurrentModel?, Error>) -> Void) {
         let urlString = "https://api.openweathermap.org/data/2.5/weather?lat=\(location.lotitude)&lon=\(location.longitude)&lang=\(language)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=\(temperature)"
         
-        guard let url = URL(string: urlString) else {return}
+        guard let url = URL(string: urlString) else { return }
         
         URLSession.shared.dataTask(with: url) { data, _, error in
             if let error = error {
@@ -33,7 +33,7 @@ class NetworkService:NSObject, NetworkServiceProtokol {
     func getWeatherForecast(location: Location, temperature: String, language: String, completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void) {
         let urlString = "https://api.openweathermap.org/data/2.5/forecast?lat=\(location.lotitude)&lon=\(location.longitude)&lang=\(language)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=\(temperature)"
         
-        guard let url = URL(string: urlString) else {return}
+        guard let url = URL(string: urlString) else { return }
         let urlRequest = URLRequest(url: url)
         
         URLSession.shared.dataTask(with: urlRequest) { data, response, error in

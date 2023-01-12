@@ -156,35 +156,31 @@ class SettingViewController: UIViewController, SettingViewControllerPtotokol {
    @objc func closeButtonPressed() {
        
        switch temperatureSegmentControl.selectedSegmentIndex {
-       case 0:
-           UserTemperature.shared.userTemperature = "metric"
        case 1:
-           UserTemperature.shared.userTemperature = "imperial"
+           UserTemperaturePreservation.shared.userTemperature = UserTemperaturePreservation.userTemperatureSelection.fahrenheit.rawValue
        default:
-           UserTemperature.shared.userTemperature = "metric"
+           UserTemperaturePreservation.shared.userTemperature = UserTemperaturePreservation.userTemperatureSelection.celsius.rawValue
        }
        
        switch languageSegmentControl.selectedSegmentIndex {
-       case 0:
-           UserLanguage.shared.userLanguage = "en"
        case 1:
-           UserLanguage.shared.userLanguage = "ru"
+           UserLanguagePreservation.shared.userLanguage = UserLanguagePreservation.userLanguageSelection.ru.rawValue
        default:
-           UserLanguage.shared.userLanguage = "en"
+           UserLanguagePreservation.shared.userLanguage = UserLanguagePreservation.userLanguageSelection.en.rawValue
        }
        
        switch themeSegmentControl.selectedSegmentIndex {
-       case 0:
-           UserTheme.shared.userTheme = "Light"
        case 1:
-           UserTheme.shared.userTheme = "Dark"
+           UserThemePreservation.shared.userTheme = UserThemePreservation.userThemeSelection.dark.rawValue
        default:
-           UserTheme.shared.userTheme = "Light"
+           UserThemePreservation.shared.userTheme = UserThemePreservation.userThemeSelection.light.rawValue
        }
        
        let vc = WeatherBuilder.build()
-       vc.presenter.updateWeatherButtonPressed(temperature: UserTemperature.shared.userTemperature,
-                                               language: UserLanguage.shared.userLanguage)
+       
+       vc.presenter.updateSearchWeatherButtonPressed(temperature: UserTemperaturePreservation.shared.userTemperature,
+                                                     language: UserLanguagePreservation
+.shared.userLanguage)
 
        dismiss(animated: true, completion: nil)
  

@@ -23,6 +23,10 @@ class LocationManager: NSObject, CLLocationManagerDelegate, LocationManagerProto
             locationManager.pausesLocationUpdatesAutomatically = true
             locationManager.activityType = .automotiveNavigation
             locationManager.startUpdatingLocation()
+        }else {
+            print("Пользователь не дал локацию")
+            
+            
         }
     }
     
@@ -30,7 +34,6 @@ class LocationManager: NSObject, CLLocationManagerDelegate, LocationManagerProto
         if let lastLocatin = locations.last {
             let latitude = String(format: "%f", lastLocatin.coordinate.latitude)
             let langitude = String(format:"%f", lastLocatin.coordinate.longitude)
-            print(latitude,langitude)
             
             location?(Location(longitude: langitude, lotitude: latitude))
             locationManager.stopUpdatingLocation()
