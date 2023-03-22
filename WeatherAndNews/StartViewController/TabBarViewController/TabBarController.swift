@@ -67,8 +67,8 @@ class TabBarViewController: UITabBarController, TabBarViewControllerProtocol {
             items[i].image = UIImage(systemName: images[i])
         }
         
-        self.tabBar.backgroundColor = UIColor(named: "element")
-        self.tabBar.tintColor = UIColor(named: "secondary")
-        self.tabBar.unselectedItemTintColor = UIColor(named: "setTitleColor")
+        self.tabBar.backgroundColor = Color.element
+        self.tabBar.tintColor = Color.secondary
+        self.tabBar.unselectedItemTintColor = Color.setTitleColor
     }
 }

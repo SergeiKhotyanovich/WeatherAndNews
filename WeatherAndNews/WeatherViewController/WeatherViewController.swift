@@ -2,6 +2,7 @@
 import UIKit
 import SnapKit
 import Alamofire
+import SwiftUI
 
 
 protocol WeatherViewControllerProtocol: AnyObject {
@@ -46,6 +47,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         let view = UISegmentedControl(items: items)
         view.selectedSegmentIndex = 0
         view.selectedSegmentTintColor = Color.secondary
+        view.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: Color.switchColor!], for: UIControl.State.normal)
         view.backgroundColor = .gray
         return view
     }()
