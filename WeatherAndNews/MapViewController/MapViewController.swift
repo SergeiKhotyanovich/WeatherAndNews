@@ -27,7 +27,7 @@ class MapViewController: UIViewController, MapViewControllerProtocol {
     private let showWeatherButton: UIButton = {
         let showWeatherButton = UIButton(type: .custom)
         showWeatherButton.backgroundColor = Color.element
-        showWeatherButton.setTitle("Show weather", for: .normal)
+        showWeatherButton.setTitle("Show weather".localized(), for: .normal)
         showWeatherButton.setTitleColor(Color.secondary, for: .normal)
         showWeatherButton.titleLabel?.font = UIFont(name: "MarkerFelt-Wide", size: 18)
         showWeatherButton.layer.cornerRadius = 10

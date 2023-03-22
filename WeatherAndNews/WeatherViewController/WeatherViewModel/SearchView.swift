@@ -47,7 +47,7 @@ class SearchView: UIView {
         setupUI()
         setupStyle()
         setupCollectionsSetting()
-        
+        updateSearchButton.isEnabled = false
         searchTextField.addTarget(self, action: #selector(sortCityArray), for: .allEvents)
         
     }

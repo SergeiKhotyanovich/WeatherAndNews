@@ -57,8 +57,8 @@ class TabBarViewController: UITabBarController, TabBarViewControllerProtocol {
     }
     
     func styleTabBar(){
-        weatherViewColtrollew.title = "Weather"
-        mapViewController.title = "Map"
+        weatherViewColtrollew.title = "Weather".localized()
+        mapViewController.title = "Map".localized()
         
         guard let items = self.tabBar.items else {return}
         let images = ["cloud.sun.fill", "map"]

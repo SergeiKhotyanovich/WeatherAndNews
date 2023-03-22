@@ -20,7 +20,7 @@ class SettingViewController: UIViewController, SettingViewControllerPtotokol {
     private let closeButton: UIButton = {
         let button = UIButton(type: .system)
         button.backgroundColor = Color.element
-        button.setTitle("Close", for: .normal)
+        button.setTitle("Close".localized(), for: .normal)
         button.setTitleColor(Color.secondary, for: .normal)
         button.titleLabel?.font = UIFont(name: "MarkerFelt-Wide", size: 20)
         return button
@@ -28,7 +28,7 @@ class SettingViewController: UIViewController, SettingViewControllerPtotokol {
     
     let languageLabel: UILabel = {
         let label = UILabel()
-        label.text = "Language:"
+        label.text = "Language:".localized()
         label.textAlignment = .center
         label.textColor = Color.secondary
         label.font = UIFont(name: "ChalkboardSE-Bold", size: 30)
@@ -37,7 +37,7 @@ class SettingViewController: UIViewController, SettingViewControllerPtotokol {
     
     let themeLabel: UILabel = {
         let label = UILabel()
-        label.text = "Theme:"
+        label.text = "Theme:".localized()
         label.textAlignment = .center
         label.textColor = Color.secondary
         label.font = UIFont(name: "ChalkboardSE-Bold", size: 30)
@@ -54,7 +54,7 @@ class SettingViewController: UIViewController, SettingViewControllerPtotokol {
     }()
     
     let themeSegmentControl: UISegmentedControl = {
-        let items = ["Light", "Dark"]
+        let items = ["Light".localized(), "Dark".localized()]
         let view = UISegmentedControl(items: items)
         view.selectedSegmentIndex = 0
         view.selectedSegmentTintColor = Color.secondary
@@ -64,7 +64,7 @@ class SettingViewController: UIViewController, SettingViewControllerPtotokol {
     
     let temperatureLabel: UILabel = {
         let label = UILabel()
-        label.text = "Temperature:"
+        label.text = "Temperature:".localized()
         label.textAlignment = .center
         label.textColor = Color.secondary
         label.font = UIFont(name: "ChalkboardSE-Bold", size: 30)
@@ -179,8 +179,7 @@ class SettingViewController: UIViewController, SettingViewControllerPtotokol {
        let vc = WeatherBuilder.build()
        
        vc.presenter.updateSearchWeatherButtonPressed(temperature: UserTemperaturePreservation.shared.userTemperature,
-                                                     language: UserLanguagePreservation
-.shared.userLanguage)
+                                                     language: UserLanguagePreservation.shared.userLanguage)
 
        dismiss(animated: true, completion: nil)
  

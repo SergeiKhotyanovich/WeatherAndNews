@@ -37,6 +37,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate, LocationManagerProto
             
             location?(Location(longitude: langitude, lotitude: latitude))
             locationManager.stopUpdatingLocation()
+            
         }
     }
 }

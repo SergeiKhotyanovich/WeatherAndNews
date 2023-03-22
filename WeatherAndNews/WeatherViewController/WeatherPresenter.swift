@@ -42,7 +42,7 @@ final class WeatherPresenter: NSObject, WeatherPresenterProtocol {
     var userLocale = ""
     var userPressure = ""
     var userSpeed = ""
-    var weatherID: [Int:String] = [0:""]
+    var weatherID: [Int: String] = [0: ""]
     
     private weak var view: WeatherViewControllerProtocol?
     private var networkService: NetworkServiceProtokol
@@ -56,6 +56,7 @@ final class WeatherPresenter: NSObject, WeatherPresenterProtocol {
     }
     
     func updateWeatherButtonPressed(temperature: String, language: String) {
+        setupUserLanguage()
         locationManager.updateLocation()
         locationManager.location = { [weak self] result in
             self?.getWeatherCurrent(location: result, temperature: temperature, language: language)
@@ -78,23 +79,11 @@ final class WeatherPresenter: NSObject, WeatherPresenterProtocol {
         
         getWeatherCurrent(location: location, temperature: temperature, language: language)
         getWeatherForecast(location: location, temperature: temperature, language: language)
-        
-//        fetchCity(location: location) { [weak self] (city) in
-//            guard let self = self else { return }
-//            DispatchQueue.main.async {
-//                self.weatherForecastModel = city
-//            }
-//
-//        }
     }
     
-//    func fetchCity(location: Location, completion: @escaping (WeatherForecastModel?) -> Void) {
-//        networkService.getJSONData(location: location, completion: completion)
-//        
-//    }
     
     func getWeatherCurrent(location: Location, temperature: String, language: String) {
-        networkService.getWeather(location: location, temperature: temperature, language: language, completion: { [weak self] result in
+        networkService.getCurrentWeather(location: location, temperature: temperature, language: language, completion: { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 switch result {
@@ -109,7 +98,7 @@ final class WeatherPresenter: NSObject, WeatherPresenterProtocol {
     }
     
     func getWeatherForecast(location: Location, temperature: String, language: String) {
-        networkService.getWeatherForecast(location: location,  temperature: temperature, language: language, completion:  { [weak self] result in
+        networkService.getForecastWeather(location: location,  temperature: temperature, language: language, completion:  { [weak self] result in
             guard let self = self else {return}
             DispatchQueue.main.async { [self] in
                 switch result {
@@ -118,7 +107,6 @@ final class WeatherPresenter: NSObject, WeatherPresenterProtocol {
                     self.forecastWeatherView = self.prepareForecastWeatherViewModel(data: self.weatherForecastModel!)
                     self.updateCurrentView(dataCurrent: self.weatherCurrentModel!, dataForecast: self.weatherForecastModel!)
                     self.view?.successForecasView()
-
                 case .failure(let error):
                     self.view?.failure(error: error)
                 }
@@ -127,32 +115,27 @@ final class WeatherPresenter: NSObject, WeatherPresenterProtocol {
     }
     
     func getSearchCity(city: String, temperature: String, language: String) {
-        networkService.getSearchCity(city: city, completion:  { [weak self] result in
-            
+        networkService.getFoundCity(city: city, completion:  { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 switch result {
                 case .success(let city):
-                    let check = city?.first?.name.count
-                    if check == nil {
-                        self.view?.showAlert()
-                    }else{
                         self.searсhСityModel = city
                         self.updateSearchWeatherButtonPressed(temperature: temperature, language: language)
                         self.addOnlyUniqueSities()
-                    }
                 case .failure(let error):
                     self.view?.failure(error: error)
+                    self.view?.showAlert()
                 }
             }
         })
     }
     
     func addOnlyUniqueSities() {
-        guard let city = searсhСityModel else { return }
+        guard let city = searсhСityModel?.first?.name else { return }
         
-        if !PreservationOfPopularCities.shared.popularCities.contains(city.first!.name) {
-            PreservationOfPopularCities.shared.popularCities.insert(city.first!.name, at: 0)
+        if !PreservationOfPopularCities.shared.popularCities.contains(city) {
+            PreservationOfPopularCities.shared.popularCities.insert(city, at: 0)
         }
         if PreservationOfPopularCities.shared.popularCities.count > 9 {
             PreservationOfPopularCities.shared.popularCities.removeLast()
@@ -319,18 +302,22 @@ final class WeatherPresenter: NSObject, WeatherPresenterProtocol {
     }
     
     private func setupUserLanguage() {
-        switch UserLanguagePreservation
-.shared.userLanguage {
+    
+        guard let locale = NSLocale.preferredLanguages.first else { return }
+        
+        switch locale {
         case "ru":
             weatherID = DataSource.weatherIDsRu
             userPressure = "гПа"
             userSpeed = "м/c"
             userLocale = "ru_RU"
+            UserLanguagePreservation.shared.userLanguage = "ru"
         default:
             weatherID = DataSource.weatherIDsEn
             userPressure = "hPa"
             userSpeed = "m/s"
             userLocale = "en_RU"
+            UserLanguagePreservation.shared.userLanguage = "en"
         }
     }
     

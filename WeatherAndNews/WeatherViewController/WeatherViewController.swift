@@ -1,6 +1,8 @@
 
 import UIKit
 import SnapKit
+import Alamofire
+
 
 protocol WeatherViewControllerProtocol: AnyObject {
     func failure(error: Error)
@@ -40,7 +42,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     }()
     
     lazy var pageControll:UISegmentedControl = {
-        let items = ["Current", "Forecast"]
+        let items = ["Current".localized(), "Forecast".localized()]
         let view = UISegmentedControl(items: items)
         view.selectedSegmentIndex = 0
         view.selectedSegmentTintColor = Color.secondary
@@ -107,6 +109,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         searchView.closeButton.addTarget(self,
                                          action: #selector(animateIsHidenSearchView),
                                          for: .touchUpInside)
+        searchView.searchTextField.addTarget(self, action: #selector(searchTextFieldIsEnable), for: .allEvents)
         settingButton.addTarget(self, action: #selector(goToSettingVC), for: .touchUpInside)
         
         notificationCenter.addObserver(self,
@@ -114,6 +117,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
                                        name: NSNotification.Name.mapViewWeatherLocation,
                                        object: nil)
     }
+
     
     //MARK: STYLE
     
@@ -208,13 +212,13 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     //MARK: FUNC
     
     @objc func searchUpdateButtonPress() {
+        
         showLoadViewIndicator()
         
         guard let cityName = searchView.searchTextField.text else { return }
         self.presenter.getSearchCity(city: cityName,
                                      temperature: UserTemperaturePreservation.shared.userTemperature,
-                                     language: UserLanguagePreservation
-.shared.userLanguage)
+                                     language: UserLanguagePreservation.shared.userLanguage)
     }
     
     
@@ -222,8 +226,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         showLoadViewIndicator()
         
         self.presenter.updateWeatherButtonPressed(temperature: UserTemperaturePreservation.shared.userTemperature,
-                                                  language: UserLanguagePreservation
-.shared.userLanguage)
+                                                  language: UserLanguagePreservation.shared.userLanguage)
     }
     
     @objc func mapViewWeatherLocation(notification: Notification) {
@@ -231,8 +234,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
         guard let coordinate = notification.userInfo as? [String : Location] else { return }
         guard let location = coordinate["location"] else { return }
         presenter.updateMapViewWeatherButtonPressed(location: location, temperature: UserTemperaturePreservation.shared.userTemperature,
-                                                    language: UserLanguagePreservation
-.shared.userLanguage)
+                                                    language: UserLanguagePreservation.shared.userLanguage)
     }
     
     @objc func animateHidenSearchView() {
@@ -257,6 +259,7 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
     
     func failure(error: Error) {
         print(error)
+        showAlert()
     }
     
     func successForecasView(){
@@ -293,6 +296,14 @@ class WeatherViewController: UIViewController, WeatherViewControllerProtocol {
             forecastView.isHidden = false
         default:
             return
+        }
+    }
+    
+    @objc func searchTextFieldIsEnable() {
+        if searchView.searchTextField.text!.count > 0{
+            searchView.updateSearchButton.isEnabled = true
+        }else {
+            searchView.updateSearchButton.isEnabled = false
         }
     }
     

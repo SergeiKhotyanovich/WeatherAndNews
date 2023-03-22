@@ -1,90 +1,50 @@
 
-import Foundation
-import CoreLocation
+    import Foundation
+    import CoreLocation
 
-protocol NetworkServiceProtokol: NSObject {
-    func getWeather(location: Location, temperature: String, language: String, completion: @escaping (Result<WeatherCurrentModel?, Error>) -> Void )
-    func getWeatherForecast(location: Location,temperature: String, language: String, completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void)
-    func getSearchCity(city: String, completion: @escaping (Result<LocationCityModel?, Error>) -> Void)
-//    func getJSONData<T: Decodable>(location: Location, completion: @escaping (T?) -> Void)
-}
-
-class NetworkService:NSObject, NetworkServiceProtokol {
-    
-    func getWeather(location: Location, temperature: String, language: String, completion: @escaping (Result<WeatherCurrentModel?, Error>) -> Void) {
-        let urlString = "https://api.openweathermap.org/data/2.5/weather?lat=\(location.lotitude)&lon=\(location.longitude)&lang=\(language)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=\(temperature)"
-        
-        guard let url = URL(string: urlString) else { return }
-        
-        URLSession.shared.dataTask(with: url) { data, _, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            do {
-                let obj = try JSONDecoder().decode(WeatherCurrentModel.self, from: data!)
-                completion(.success(obj))
-            } catch{
-                completion(.failure(error))
-            }
-        }.resume()
+    protocol NetworkServiceProtokol: NSObject {
+    func getCurrentWeather(location: Location, temperature: String, language: String, completion: @escaping (Result<WeatherCurrentModel?, Error>) -> Void )
+    func getForecastWeather(location: Location,temperature: String, language: String, completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void)
+    func getFoundCity(city: String, completion: @escaping (Result<LocationCityModel?, Error>) -> Void)
+    //    func getJSONData<T: Decodable>(location: Location, completion: @escaping (T?) -> Void)
     }
-    
-    func getWeatherForecast(location: Location, temperature: String, language: String, completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void) {
-        let urlString = "https://api.openweathermap.org/data/2.5/forecast?lat=\(location.lotitude)&lon=\(location.longitude)&lang=\(language)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=\(temperature)"
-        
-        guard let url = URL(string: urlString) else { return }
-        let urlRequest = URLRequest(url: url)
-        
-        URLSession.shared.dataTask(with: urlRequest) { data, response, error in
-            guard let data = data else { return }
+
+    class NetworkService: NSObject, NetworkServiceProtokol {
+
+        func getCurrentWeather(location: Location, temperature: String, language: String, completion: @escaping (Result<WeatherCurrentModel?, Error>) -> Void) {
+           let urlString = "https://api.openweathermap.org/data/2.5/weather?lat=\(location.lotitude)&lon=\(location.longitude)&lang=\(UserLanguagePreservation.shared.userLanguage)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=\(UserTemperaturePreservation.shared.userTemperature)"
             
-            do {
-                let obj = try JSONDecoder().decode(WeatherForecastModel.self, from: data)
-               
-                completion(.success(obj))
-            } catch{
-                
-            }
-        }.resume()
-    }
-    
-    func getSearchCity(city: String,  completion: @escaping (Result<LocationCityModel?, Error>) -> Void) {
-        let urlString = "http://api.openweathermap.org/geo/1.0/direct?q=\(city)&limit=5&appid=fe0a8df10334d41e9f5615b5cbca266f"
-        
-        guard let url = URL(string: urlString) else {return}
-        let urlRequest = URLRequest(url: url)
+            execute(urlRequest: getUrlRequest(urlString: urlString), completion: completion)
+        }
 
-        URLSession.shared.dataTask(with: urlRequest) {  data, response, error in
-            guard let data = data else { return }
-            do {
-                let obj = try JSONDecoder().decode(LocationCityModel.self, from: data)
-                completion(.success(obj))
-            } catch{
-                
-            }
-        }.resume()
+        func getForecastWeather(location: Location, temperature: String, language: String, completion: @escaping (Result<WeatherForecastModel?, Error>) -> Void) {
+            let urlString = "https://api.openweathermap.org/data/2.5/forecast?lat=\(location.lotitude)&lon=\(location.longitude)&lang=\(language)&appid=fe0a8df10334d41e9f5615b5cbca266f&units=\(temperature)"
+            
+            execute(urlRequest: getUrlRequest(urlString: urlString), completion: completion)
+        }
+
+        func getFoundCity(city: String,  completion: @escaping (Result<LocationCityModel?, Error>) -> Void) {
+            let urlString = "http://api.openweathermap.org/geo/1.0/direct?q=\(city)&limit=5&appid=fe0a8df10334d41e9f5615b5cbca266f"
+            
+            execute(urlRequest: getUrlRequest(urlString: urlString), completion: completion)
+        }
+
+        private func getUrlRequest(urlString: String) -> URLRequest {
+            
+            guard let url = URL(string: urlString) else { return URLRequest(url: URL(fileURLWithPath: ""))}
+            return URLRequest(url: url)
+        }
+
+        private func execute<T: Decodable>(urlRequest: URLRequest, completion: @escaping (Result<T?, Error>) -> Void) {
+            
+            URLSession.shared.dataTask(with: urlRequest) {  data, response, error in
+                guard let data = data else { return }
+                do {
+                    let obj = try JSONDecoder().decode(T.self, from: data)
+                    completion(.success(obj))
+                } catch{
+                    completion(.failure(error))
+                }
+            }.resume()
+        }
     }
-    
-    
-//    func getJSONData<T: Decodable>(location: Location, completion: @escaping (T?) -> Void) {
-//        let urlString = "https://api.openweathermap.org/data/2.5/forecast?lat=55&lon=44&appid=fe0a8df10334d41e9f5615b5cbca266f&units=metric"
-//
-//        guard let url = URL(string: urlString) else {return}
-//        let urlRequest = URLRequest(url: url)
-//
-//        URLSession.shared.dataTask(with: urlRequest) { data, response, error in
-//            guard let data = data else { return }
-//            do {
-//                let obj = try JSONDecoder().decode(T.self, from: data)
-//                completion(obj)
-//            } catch{
-//
-//            }
-//
-//        }.resume()
-//    }
-    
-    
-    
-}

@@ -1,0 +1,19 @@
+/* 
+  Localizable.strings
+  WeatherAndNews
+
+  Created by Сергей Хотянович on 21.03.23.
+  
+*/
+
+"Weather" = "Погода";
+"Current" = "Текущая";
+"Forecast" = "Прогноз";
+"Map" = "Карта";
+"Show weather" = "Показать погоду";
+"Close" = "Закрыть";
+"Language:" = "Язык:";
+"Theme:" = "Тема:";
+"Light" = "Светлая";
+"Dark" = "Темная";
+"Temperature:" = "Температура:";
